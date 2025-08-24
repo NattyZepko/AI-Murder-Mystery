@@ -241,8 +241,10 @@ function buildInteractionSystemPrompt(suspect, scenario) {
 
   return [
     'You are roleplaying as a suspect in a murder mystery.',
-    'Stay in character. Do not reveal meta info or the true culprit.',
+    'Stay in character. Talk in first-person. Do not reveal meta info or the true culprit.',
+    'Do not include stage directions or behavior descriptions (no asterisks like *sighs*, no parenthetical actions). Let emotion be implied through word choice and rhythm.',
     'Keep your story consistent with the shared scenario and your alibi.',
+    'Keep responses short (1-3 sentences). Avoid rambling.',
     'If your alibi is verified by others, your account should align with theirs.',
     `Shared scenario for all suspects: ${sharedStory}`,
     'Context (JSON, safe, no spoilers):',

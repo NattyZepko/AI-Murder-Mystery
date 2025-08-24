@@ -86,9 +86,9 @@ Rules:
 - Alibis: Innocent suspects can have verifiable alibis. Use the field "alibiVerifiedBy" with suspect IDs who can confirm. The guilty suspect must have NO verifiable alibi (set alibiVerifiedBy to []).
 - Motives: Some suspects should have no motive (set "motive" to an empty string ""), while most others have motives. The guilty suspect must have a clear motive.
 - Relationships: Include meaningful ties among suspects (family, lovers, exes, friends, rivals, enemies, mentor-mentee, etc.). At least one SECRET relationship (e.g., secret-affair) whose potential exposure could be a motive. Use the "relationships" list to define pairs.
-- Witnessed events: Include 2–5 short entries where named witnesses saw relevant moments (raised voices, someone near a weapon, a hushed argument, someone leaving a restricted area). Use suspect IDs.
+- Witnessed events: Include 2–5 short entries where named witnesses saw relevant moments (for example: raised voices, someone near a weapon, a hushed argument, someone leaving a restricted area, you can come up with more). Use suspect IDs. These events should be relevant to the previous information, and should form a coherent story.
 - Weapon proximity: Each weapon should be found ON a suspect or NEAR a suspect. The TRUE murder weapon MUST be found on/near the guilty suspect.
-- Keep the timeline coherent and embed contradictions that implicate the guilty.
+- Keep the timeline coherent and embed contradictions that implicate the guilty. Fit the events into the story.
 - Output must be valid JSON only.
 `;
 
@@ -100,7 +100,7 @@ Rules:
 ${avoidLine}
 Use creative, setting-appropriate weapons. Avoid clichés like wrenches, letter openers, and candlesticks.
 Name each weapon concisely with NO stopwords (no "and", "or", "with", "of", "a", "an", "the", etc.) and no prepositional phrases.
-Ensure each suspect has a gender and age. Make personalities bold and distinct, some angry/sad/funny. Add quirks and a simple catchphrase for a few. Avoid stage directions; show emotion through word choice.`;
+Ensure each suspect has a gender and age. Make personalities bold and distinct, some angry/sad/funny/rude/scared. Add quirks and a simple catchphrase for a few. Avoid stage directions and behavior descriptions; show emotion through word choice.`;
 
     const res = await chatWithAI({
         system,
@@ -371,7 +371,13 @@ Ensure each suspect has a gender and age. Make personalities bold and distinct, 
                         `Noticed the ${w.name} earlier in a common area`,
                         `Recalls seeing ${w.name} unattended`,
                         `Heard someone mention the ${w.name} earlier`,
-                        `Vaguely remembers the ${w.name} being around before the incident`
+                        `Vaguely remembers the ${w.name} being around before the incident`,
+                        `Thinks they passed by the ${w.name} at some point`,
+                        `Might have seen the ${w.name} while walking through`,
+                        `Remembers the ${w.name} being somewhere nearby, not sure when`,
+                        `Feels like the ${w.name} was visible earlier in the day`,
+                        `Can't recall clearly, but the ${w.name} may have been in the room`,
+                        `Not certain, but the ${w.name} seemed to be out in the open`
                     ];
                     const phrase = neutralPhrases[Math.floor(Math.random() * neutralPhrases.length)];
                     holder.knowledge.push(phrase);
