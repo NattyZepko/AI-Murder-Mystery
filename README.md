@@ -6,6 +6,10 @@ Interactive AI‑driven detective experience. You investigate a procedurally gen
 
 </div>
 
+## Every game generates a whole new, unique murder case!
+<img width="1839" height="895" alt="image" src="https://github.com/user-attachments/assets/064a5a16-c923-4c21-8d93-f1a49ba2814a" />
+
+
 ## ✨ What This Project Is
 An extensible Node.js + TypeScript (client) + Express backend game that uses Large Language Models (LLMs) to:
 - Generate a coherent scenario (victim, suspects, motives, weapons, alibis)
