@@ -1,0 +1,47 @@
+import React from 'react'
+import type { ChatMessage } from '../types'
+
+export function ChatPanel({ title, messages, onSend, thinking, colorize }: { title: string, messages: ChatMessage[], onSend: (text: string) => void, thinking: boolean, colorize?: (text: string) => string }) {
+  const [input, setInput] = React.useState('')
+  const listRef = React.useRef<HTMLDivElement | null>(null)
+
+  React.useEffect(() => {
+    const el = listRef.current
+    if (el) {
+      el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
+    }
+  }, [messages, thinking])
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault()
+    const t = input.trim()
+    if (!t) return
+    onSend(t)
+    setInput('')
+  }
+
+  return (
+    <div style={{ border: '1px solid #ddd', borderRadius: 8, padding: 12 }}>
+      <div style={{ fontWeight: 600, marginBottom: 8 }}>{title}</div>
+      <div ref={listRef} style={{ height: '60vh', overflow: 'auto', padding: 8, background: '#fafafa', borderRadius: 6, marginBottom: 8 }}>
+        {messages.map((m, i) => (
+          <div key={i} style={{ marginBottom: 8, display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
+            <div style={{ maxWidth: '80%', padding: '8px 10px', borderRadius: 8, background: m.role === 'user' ? '#dbeafe' : '#e5e7eb' }}>
+              <div style={{ fontSize: 12, color: '#555', marginBottom: 4 }}>{m.role === 'user' ? 'You' : 'Suspect'}</div>
+              {m.role === 'assistant' && colorize ? (
+                <div dangerouslySetInnerHTML={{ __html: colorize(m.content) }} />
+              ) : (
+                <div>{m.content}</div>
+              )}
+            </div>
+          </div>
+        ))}
+        {thinking && <div style={{ fontStyle: 'italic', color: '#666' }}>Thinking…</div>}
+      </div>
+      <form onSubmit={submit} style={{ display: 'flex', gap: 8 }}>
+        <input value={input} onChange={e => setInput(e.target.value)} placeholder="Ask a question…" style={{ flex: 1, padding: '8px 10px', borderRadius: 6, border: '1px solid #ccc' }} />
+        <button type="submit" disabled={thinking} style={{ padding: '8px 12px' }}>Send</button>
+      </form>
+    </div>
+  )
+}
