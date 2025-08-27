@@ -8,10 +8,10 @@
   },
   "about": {
     "title": "About Me",
-    "p1": "Hi! I'm the creator of this AI-powered murder mystery game.",
-    "p1b": "I love combining storytelling, technology, and interactive experiences.",
-    "p1c": "This project is a blend of my passion for games, AI, and creative problem-solving.",
-    "p2": "If you enjoy the game or have feedback, feel free to reach out!"
+    "p1": "Hi! My name is Natty (נתי). I love games, stories, and programming, so I tend to combine them all.",
+    "p1b": "This is a side project I built myself, with help from AI, to show what it can do for building and for creating new experiences in games and entertainment.",
+    "p1c": "This project is an interesting solution to a problem game developers have dreamed of worldwide: a fully automatic experience that isn't predetermined—a game (not unlike Dungeons & Dragons) that's automatic, autonomous, and unique every time you play it.",
+    "p2": "If you enjoyed the game or have feedback, I'd love to hear from you!"
   },
   "how": {
     "title": "How It Works",
@@ -29,27 +29,50 @@
     "aiBackendDesc": "The AI backend powers all scenario generation, suspect dialogue, and clue extraction for your game session.",
     "behindScenesTitle": "Behind the Scenes",
     "technicalStackTitle": "Technical Stack",
-    "extendingTitle": "Extending & Customizing"
+    "extendingTitle": "Extending & Customizing",
+    "scenarioGeneration": "Scenario Generation: The AI creates a coherent scenario with a victim, suspects, motives, weapons, alibis, and relationships. Every detail is procedurally generated, so no two games are the same.",
+    "consistencyRules": "Consistency Rules: The system enforces logical constraints (e.g., only one true murderer, plausible clues) to ensure a fair and solvable mystery.",
+    "interrogation": "Interrogation: You select suspects to question. Each suspect is role-played by the AI, which remembers prior dialogue and adapts its responses.",
+    "clueExtraction": "Clue Extraction: After each conversation, the AI analyzes the dialogue to extract meaningful clues, which are added to your clue log.",
+    "deductionAccusation": "Deduction & Accusation: Review the clues, connect the dots, and submit your accusation when you think you've solved the case.",
+    "replayability": "Replayability: If you guess wrong, you can generate a new scenario and try again. Every playthrough is different!",
+    "aiBackendUnified": "Unified AI Backend: The game uses a single AI backend to generate scenarios, role-play suspects, and extract clues.",
+    "aiBackendReliable": "Reliable Experience: The backend ensures a consistent and uninterrupted gameplay experience.",
+    "scenarioEngine": "Scenario Engine: The backend builds and refines each case using scenario rules and normalization logic.",
+    "rolePlayingAI": "Role-Playing AI: Each suspect is role-played by the AI, maintaining memory of your previous questions and their own alibis, motives, and secrets.",
+    "clueMining": "Clue Mining: The AI extracts structured clues from free-form conversations, helping you keep track of important facts.",
+    "extensibleDesign": "Extensible Design: The system is built to be extended—add new clue types, scoring logic, or even new AI providers by editing the backend modules.",
+    "techStackNode": "Node.js + Express: Backend API for scenario generation, chat, and clue extraction.",
+    "techStackReact": "TypeScript & React: Modern, responsive client UI (this app) built with Vite.",
+    "techStackAI": "AI Backend: All scenario and dialogue logic is powered by a single AI backend.",
+    "extendingClueLogic": "Add new clue extraction logic in src/clues.js.",
+    "extendingScenarioRules": "Experiment with scenario rules in core/ and src/scenarioGenerator.js.",
+    "extendingAIProviders": "Swap or add AI providers by editing src/ai.js.",
+    "extendingContribute": "Contribute new features, UI improvements, or scenario types via pull requests!",
+    "enjoyExploring": "Enjoy exploring, interrogating, and solving the mystery!",
+    "githubLinePrefix": "If you want to see the in-and-out, here's the ",
+    "githubLineLinkText": "GitHub link",
+    "githubLineSuffix": ""
   },
   "qa": {
     "title": "Q&A",
     "items": {
       "whatGame_q": "What is this game?",
-      "whatGame_a": "This is an AI-powered murder mystery game. You play as a detective, questioning suspects and solving the case using clues and logic.",
-      "howPlay_q": "How do I play?",
-      "howPlay_a": "Read the scenario, talk to suspects, gather clues, and try to deduce who the culprit is. Use the chat to ask questions and submit your accusation when you think you know who did it, and with what weapon. If you don't have the correct weapon, try investigating some more.",
-      "canLose_q": "Can I lose the game?",
-      "canLose_a": "No. If you accuse the wrong suspect, the case remains unsolved, but you can just keep investigating or guessing. The Engine is entirely run by AI, so it will adapt to your actions, but it isn't perfect. If you encounter any troubles at all, try a new scenario.",
+      "whatGame_a": "This is a mystery game powered by AI... A murder has occurred, and you need to interrogate suspects and find out who the killer is.",
+      "howPlay_q": "How do you play?",
+      "howPlay_a": "Read the scenario, question the suspects, collect clues, and try to deduce who is guilty.",
+      "canLose_q": "Can you lose?",
+      "canLose_a": "No. If you accuse the wrong person, the game remains unsolved. You must keep interrogating suspects and deducing until you catch the killer.",
       "sameStory_q": "Is the story the same every time?",
-      "sameStory_a": "No, each game generates a new scenario with different suspects, motives, and clues.",
-      "repeat_q": "Then can I try the same scenario again? Or repeat a scenario? Or ask for a specific scenario?",
+      "sameStory_a": "No, each game generates a new scenario.",
+      "repeat_q": "Can you play the same scenario again? Can you request a specific scenario?",
       "repeat_a": "No.",
-      "glitch_q": "The AI is misbehaving / glitchy / doesn't remember things / is wrong!",
-      "glitch_a": "Yeah, it's just an AI after all. Try correcting it, pointing it in the right direction, and if all else fails, try refreshing the page or starting a new game.",
+      "glitch_q": "The AI is wrong!",
+      "glitch_a": "That's normal. The AI isn't perfect and may make mistakes. Try gently 'correcting' it in the right direction. If nothing works, try restarting the game by refreshing the page.",
       "whoMade_q": "Who made this?",
-      "whoMade_a": "This game was created by Natty Zepko using React and AI technologies.",
-      "suggest_q": "I have a suggestion...",
-      "suggest_a": "I am mostly done with the project, but I am open to feedback and suggestions for improvement. Contact me at natty.zepko@gmail.com"
+      "whoMade_a": "Me. Alone. Details are in the 'About Me' tab.",
+      "suggest_q": "I have a suggestion... maybe some things could be improved...",
+      "suggest_a": "Honestly, I'll be real with you, I'm not super keen on upgrading the project. If your suggestion requires too much effort, I'll probably ignore it. But if you really, really want to ask me something, go ahead—my details are in 'About Me'."
     }
   },
   "chat": {
@@ -84,14 +107,13 @@
     "selectSuspectPrompt": "Select a suspect to start a conversation.",
     "suspectsTitle": "Suspects",
     "interrogateTitle": "Interrogate",
-  "generating": "Generating…",
-  "relationshipsTitle": "Relationships",
-  "witnessedEventsTitle": "Witnessed Events",
+    "generating": "Generating…",
+    "relationshipsTitle": "Relationships",
+    "witnessedEventsTitle": "Witnessed Events",
     "cluesTitle": "Clues",
     "noClues": "No clues yet.",
     "weaponsMentioned": "Weapons mentioned",
-    "noneYet": "- none yet"
-    ,
+    "noneYet": "- none yet",
     "settingLabel": "Setting:",
     "victimLabel": "Victim:",
     "funnyErrors": [
@@ -126,8 +148,7 @@
     "weapon": "weapon",
     "location": "location",
     "time": "time"
-  }
-  ,
+  },
   "debug": {
     "field": "Field",
     "value": "Value",
@@ -143,9 +164,32 @@
     "witnessedEvents": "Witnessed Events",
     "noData": "-",
     "betweenSeparator": " ↔ ",
-    "suspectColumns": ["name","gender","age","isGuilty","motive","alibi","verifiedBy"],
-    "weaponColumns": ["name","isMurderWeapon","foundOn","foundNear"],
-    "relColumns": ["between","type","secret","note"],
-    "eventColumns": ["time","description","witnesses","involves"]
+    "suspectColumns": [
+      "name",
+      "gender",
+      "age",
+      "isGuilty",
+      "motive",
+      "alibi",
+      "verifiedBy"
+    ],
+    "weaponColumns": [
+      "name",
+      "isMurderWeapon",
+      "foundOn",
+      "foundNear"
+    ],
+    "relColumns": [
+      "between",
+      "type",
+      "secret",
+      "note"
+    ],
+    "eventColumns": [
+      "time",
+      "description",
+      "witnesses",
+      "involves"
+    ]
   }
 }

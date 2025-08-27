@@ -134,7 +134,7 @@ function AppInner() {
     setError(null);
     setRetryNotice(null);
     setLoading(true);
-  const funnyErrors: string[] = Array.isArray((en.main as any)?.funnyErrors) ? (en.main as any).funnyErrors : [];
+    const funnyErrors: string[] = Array.isArray((en.main as any)?.funnyErrors) ? (en.main as any).funnyErrors : [];
     let sc: any = null;
     try {
       sc = await generateScenario(language);
@@ -143,8 +143,8 @@ function AppInner() {
       try {
         sc = await generateScenario(language);
       } catch (e2: any) {
-          setError(e2.message || en.main.generateScenario);
-        }
+        setError(e2.message || en.main.generateScenario);
+      }
     }
     if (sc) {
       try {
@@ -156,7 +156,7 @@ function AppInner() {
           }
           sc = { ...sc, suspects: arr };
         }
-      } catch {}
+      } catch { }
       setScenario(sc);
       setActiveSuspectId(null);
       setMessages([]);
@@ -166,6 +166,8 @@ function AppInner() {
       setDebug(false);
       setSolved(false);
       setStartTime(Date.now());
+      setError(null);
+      setRetryNotice(null);
     }
     setLoading(false);
   };
@@ -179,7 +181,7 @@ function AppInner() {
     if (!activeSuspectId || !scenario) return;
     const suspect = (scenario.suspects ?? []).find((s: any) => s.id === activeSuspectId);
     if (!suspect) return;
-  const system = buildSystemForSuspect(suspect, scenario, language);
+    const system = buildSystemForSuspect(suspect, scenario, language);
     const next: ChatMessage[] = [...messages, { role: 'user' as const, content: text }];
     setMessages(next);
     try {
@@ -198,7 +200,7 @@ function AppInner() {
       });
       setMentionedWeapons(newlyMentioned);
       try {
-  const newClues = await extractClues({ reply, lastUserText: text, suspect, scenario, language });
+        const newClues = await extractClues({ reply, lastUserText: text, suspect, scenario, language });
         const extracted = Array.isArray(newClues) ? newClues : [];
         // fallback stub for localExtractClues: returns empty array
         const localExtractClues = () => [];
@@ -227,7 +229,7 @@ function AppInner() {
     } catch (err: any) {
       setMessages([...next, { role: 'assistant' as const, content: `Error: ${err.message}` }]);
     } finally {
-  setThinking(false);
+      setThinking(false);
     }
   };
 
@@ -247,13 +249,13 @@ function AppInner() {
     return (
       <>
         {startTime && !solved && (
-              <div style={{ position: 'fixed', top: 12, [isRTL ? 'left' : 'right']: 16, background: 'rgba(17,24,39,0.9)', color: '#fff', padding: '6px 10px', borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.2)', zIndex: 1000 }}>
-                ⏱ {formatDuration(elapsedMs)}
-              </div>
-            )}
-  <h1>{en.main.title}</h1>
-  <p>{en.main.intro1}</p>
-  <p>{en.main.intro2}</p>
+          <div style={{ position: 'fixed', top: 12, [isRTL ? 'left' : 'right']: 16, background: 'rgba(17,24,39,0.9)', color: '#fff', padding: '6px 10px', borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.2)', zIndex: 1000 }}>
+            ⏱ {formatDuration(elapsedMs)}
+          </div>
+        )}
+        <h1>{en.main.title}</h1>
+        <p>{en.main.intro1}</p>
+        <p>{en.main.intro2}</p>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
           {(!scenario || solved) && (
             <button disabled={loading} onClick={generate}>{loading ? en.main.generating : (solved ? en.main.generateNewMystery : en.main.generateScenario)}</button>
@@ -296,7 +298,7 @@ function AppInner() {
                               <strong style={{ wordBreak: 'break-word' }}>{s.name}</strong>
                               <span style={{ color: '#e5e7eb', whiteSpace: 'nowrap', flex: '0 0 auto', fontSize: 12, lineHeight: 1 }}>(
                                 {(en.labels as any)[`gender_${String(s.gender || 'unknown').toLowerCase()}`] || (s.gender || 'unknown')}, {(en.labels as any).agePrefix ? `${(en.labels as any).agePrefix} ${s.age}` : s.age}
-                              )</span>
+                                )</span>
                             </div>
                           </div>
                           {debug && (
@@ -309,34 +311,44 @@ function AppInner() {
                 </div>
                 <div>
                   <h3>{en.main.interrogateTitle}</h3>
-                        {!activeSuspectId && <p>{en.main.selectSuspectPrompt}</p>}
-                        {activeSuspectId && (
-                          <div style={{ background: '#1e293b', borderRadius: 10, padding: 12, color: '#f3f4f6', minHeight: 320 }}>
-                            <ChatPanel
-                              title={(scenario.suspects ?? []).find((s: any) => s.id === activeSuspectId)?.name || 'Suspect'}
-                              thinking={thinking}
-                              messages={messages}
-                              onSend={send}
-                              colorize={(t: string) => colorizeText({ text: t, weaponKeywordMap, suspectNameToColor, suspectTokenToColor })}
-                            />
-                          </div>
-                        )}
+                  {!activeSuspectId && <p>{en.main.selectSuspectPrompt}</p>}
+                  {activeSuspectId && (
+                    <div style={{ background: '#1e293b', borderRadius: 10, padding: 12, color: '#f3f4f6', minHeight: 320 }}>
+                      <ChatPanel
+                        title={(scenario.suspects ?? []).find((s: any) => s.id === activeSuspectId)?.name || 'Suspect'}
+                        thinking={thinking}
+                        messages={messages}
+                        onSend={send}
+                        colorize={(t: string) => {
+                          // For Hebrew, normalize suspect names for RTL and possible diacritics
+                          let normalizedSuspectNameToColor = { ...suspectNameToColor };
+                          if (isRTL) {
+                            normalizedSuspectNameToColor = {};
+                            Object.entries(suspectNameToColor).forEach(([name, color]) => {
+                              // Remove diacritics and normalize
+                              const normName = name.normalize('NFC');
+                              normalizedSuspectNameToColor[normName] = color;
+                            });
+                          }
+                          return colorizeText({ text: t, weaponKeywordMap, suspectNameToColor: normalizedSuspectNameToColor, suspectTokenToColor });
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
                 <div>
                   <SubmitPanel scenario={scenario} mentionedWeapons={mentionedWeapons} onSolved={handleSolved} />
                   <div style={{ marginTop: 16 }}>
                     <h3>{en.main.cluesTitle}</h3>
                     <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', margin: '6px 0 8px' }}>
-                      {Object.values(en.clues).map((tabLabel) => tabLabel).map((tab) => {
-                        // map returns values like 'all','motive', ... ensure it's a string to satisfy React key typing
-                        const key = String(tab);
+                      {Object.entries(en.clues).map(([key, tabLabel]) => {
                         const isActive = activeClueTab === key;
                         const count = key === 'all' ? clues.length : clues.filter(c => c.type === key).length;
                         if (key !== 'all' && count === 0) return null;
                         return (
                           <button key={key} onClick={() => setActiveClueTab(key)}
                             style={{ padding: '4px 8px', borderRadius: 999, border: '1px solid #ccc', background: isActive ? '#111827' : '#fff', color: isActive ? '#fff' : '#111827', fontSize: 12 }}>
-                            {key} ({count})
+                            {tabLabel} ({count})
                           </button>
                         );
                       })}
@@ -371,9 +383,9 @@ function AppInner() {
                 </div>
               </div>
             </div>
-      {debug && scenario.relationships?.length > 0 && (
+            {debug && scenario.relationships?.length > 0 && (
               <>
-        <h3>{en.main.relationshipsTitle}</h3>
+                <h3>{en.main.relationshipsTitle}</h3>
                 <ul>
                   {scenario.relationships.map((r: any, i: number) => {
                     const nameById: Record<string, string> = Object.fromEntries((scenario.suspects ?? []).map((s: any) => [s.id, s.name]));
@@ -386,9 +398,9 @@ function AppInner() {
                 </ul>
               </>
             )}
-      {debug && scenario.witnessedEvents?.length > 0 && (
+            {debug && scenario.witnessedEvents?.length > 0 && (
               <>
-        <h3>{en.main.witnessedEventsTitle}</h3>
+                <h3>{en.main.witnessedEventsTitle}</h3>
                 <ul>
                   {scenario.witnessedEvents.map((w: any, i: number) => {
                     const nameById: Record<string, string> = Object.fromEntries((scenario.suspects ?? []).map((s: any) => [s.id, s.name]));
@@ -437,7 +449,7 @@ function AppInner() {
         color: '#f3f4f6',
       }}
     >
-  <TopBar currentPage={page} onNavigate={setPage as any} />
+      <TopBar currentPage={page} onNavigate={setPage as any} />
       {page === 'game' && renderGamePage()}
       {page === 'about' && <AboutPage />}
       {page === 'how' && <HowItWorksPage />}

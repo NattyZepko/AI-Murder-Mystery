@@ -5,18 +5,17 @@
     "how": "Comment ça marche",
     "qa": "Q&R",
     "languageTitle": "Langue"
-  }
-  ,
+  },
   "about": {
     "title": "À propos",
-    "p1": "Bonjour ! Je suis le créateur de ce jeu de meurtre alimenté par l'IA.",
-    "p1b": "J'adore combiner narration, technologie et expériences interactives.",
-    "p1c": "Ce projet mélange ma passion pour les jeux, l'IA et la résolution créative de problèmes.",
-    "p2": "Si vous aimez le jeu ou avez des retours, n'hésitez pas à me contacter !"
+    "p1": "Bonjour ! Je m'appelle Natty (נתי). J'adore les jeux, les histoires et la programmation, donc j'ai tendance à tout combiner.",
+    "p1b": "Ceci est un projet personnel que j'ai réalisé moi-même, avec l'aide de l'IA, pour montrer ce qu'elle peut apporter à la création et à l'expérience de jeu et de divertissement.",
+    "p1c": "Ce projet est une solution intéressante à un problème dont rêvent les développeurs du monde entier : une expérience entièrement automatique, non prédéterminée, un jeu (similaire à Donjons & Dragons) mais automatique, autonome et unique à chaque partie.",
+    "p2": "Si vous avez apprécié le jeu ou avez des retours, je serais ravi de vous lire !"
   },
   "how": {
     "title": "Comment ça marche",
-    "subtitle": "AI Murder Mystery est une expérience interactive de détective alimentée par des modèles d'IA avancés...",
+    "subtitle": "AI Murder Mystery est une expérience de détective interactive alimentée par des modèles d'IA avancés. Chaque partie génère une nouvelle affaire de meurtre unique à résoudre en interrogeant les suspects, en collectant des indices et en formulant votre accusation finale.",
     "gameFlow": "Flux du jeu",
     "startGame": "Démarrer le jeu",
     "generateScenario": "Générer un scénario",
@@ -30,27 +29,50 @@
     "aiBackendDesc": "Le backend IA alimente la génération des scénarios, les dialogues des suspects et l'extraction des indices.",
     "behindScenesTitle": "Dans les coulisses",
     "technicalStackTitle": "Technologies utilisées",
-    "extendingTitle": "Étendre & personnaliser"
+    "extendingTitle": "Étendre & personnaliser",
+    "scenarioGeneration": "Génération du scénario : L'IA crée un scénario cohérent avec une victime, des suspects, des motifs, des armes, des alibis et des relations. Chaque détail est généré de manière procédurale, donc aucune partie n'est identique.",
+    "consistencyRules": "Règles de cohérence : Le système applique des contraintes logiques (par exemple, un seul vrai meurtrier, des indices plausibles) pour garantir une énigme juste et solvable.",
+    "interrogation": "Interrogatoire : Vous choisissez les suspects à interroger. Chaque suspect est incarné par l'IA, qui se souvient des dialogues précédents et adapte ses réponses.",
+    "clueExtraction": "Extraction d'indices : Après chaque conversation, l'IA analyse le dialogue pour extraire des indices pertinents, qui sont ajoutés à votre journal d'indices.",
+    "deductionAccusation": "Déduction & accusation : Passez en revue les indices, reliez les éléments et soumettez votre accusation lorsque vous pensez avoir résolu l'affaire.",
+    "replayability": "Rejouabilité : Si vous vous trompez, vous pouvez générer un nouveau scénario et réessayer. Chaque partie est différente !",
+    "aiBackendUnified": "Backend IA unifié : Le jeu utilise un seul backend IA pour générer les scénarios, incarner les suspects et extraire les indices.",
+    "aiBackendReliable": "Expérience fiable : Le backend garantit une expérience de jeu cohérente et ininterrompue.",
+    "scenarioEngine": "Moteur de scénario : Le backend construit et affine chaque affaire à l'aide de règles de scénario et de logique de normalisation.",
+    "rolePlayingAI": "IA de rôle : Chaque suspect est incarné par l'IA, qui garde en mémoire vos questions précédentes ainsi que ses propres alibis, motifs et secrets.",
+    "clueMining": "Extraction d'indices : L'IA extrait des indices structurés à partir de conversations libres, vous aidant à suivre les faits importants.",
+    "extensibleDesign": "Conception extensible : Le système est conçu pour être étendu—ajoutez de nouveaux types d'indices, une logique de score ou même de nouveaux fournisseurs IA en modifiant les modules du backend.",
+    "techStackNode": "Node.js + Express : API backend pour la génération de scénarios, le chat et l'extraction d'indices.",
+    "techStackReact": "TypeScript & React : Interface utilisateur moderne et réactive (cette application) construite avec Vite.",
+    "techStackAI": "Backend IA : Toute la logique de scénario et de dialogue est alimentée par un seul backend IA.",
+    "extendingClueLogic": "Ajoutez une nouvelle logique d'extraction d'indices dans src/clues.js.",
+    "extendingScenarioRules": "Expérimentez avec les règles de scénario dans core/ et src/scenarioGenerator.js.",
+    "extendingAIProviders": "Remplacez ou ajoutez des fournisseurs IA en modifiant src/ai.js.",
+    "extendingContribute": "Contribuez à de nouvelles fonctionnalités, améliorations UI ou types de scénarios via pull request !",
+    "enjoyExploring": "Bon jeu, bonne enquête et bonne résolution de mystère !",
+    "githubLinePrefix": "Si vous voulez voir les coulisses, voici le ",
+    "githubLineLinkText": "lien GitHub",
+    "githubLineSuffix": ""
   },
   "qa": {
     "title": "Q&R",
     "items": {
-      "whatGame_q": "Qu'est-ce que ce jeu ?",
-      "whatGame_a": "C'est un jeu de meurtre alimenté par l'IA...",
+      "whatGame_q": "C'est quoi ce jeu ?",
+      "whatGame_a": "C'est un jeu d'enquête alimenté par l'IA... Un meurtre a eu lieu, et vous devez interroger les suspects et découvrir qui est le coupable.",
       "howPlay_q": "Comment jouer ?",
-      "howPlay_a": "Lisez le scénario, interrogez les suspects, recueillez des indices et essayez de déduire qui est le coupable.",
+      "howPlay_a": "Lisez le scénario, interrogez les suspects, collectez des indices et essayez de déduire qui est le coupable.",
       "canLose_q": "Peut-on perdre ?",
-      "canLose_a": "Non. Si vous accusez la mauvaise personne, l'affaire reste non résolue, vous pouvez continuer à enquêter.",
+      "canLose_a": "Non. Si vous accusez la mauvaise personne, l'enquête reste non résolue. Vous devez continuer à interroger et à déduire jusqu'à trouver le coupable.",
       "sameStory_q": "L'histoire est-elle la même à chaque fois ?",
       "sameStory_a": "Non, chaque partie génère un nouveau scénario.",
-      "repeat_q": "Puis-je rejouer le même scénario ?",
+      "repeat_q": "Peut-on rejouer le même scénario ? Demander un scénario précis ?",
       "repeat_a": "Non.",
-      "glitch_q": "L'IA fait des erreurs !",
-      "glitch_a": "C'est normal, essayez de corriger ou de relancer le jeu.",
-      "whoMade_q": "Qui a créé ceci ?",
-      "whoMade_a": "Ce jeu a été créé par Natty Zepko.",
-      "suggest_q": "J'ai une suggestion...",
-      "suggest_a": "Envoyez vos retours à natty.zepko@gmail.com"
+      "glitch_q": "L'IA se trompe !",
+      "glitch_a": "C'est normal. L'IA n'est pas parfaite et peut faire des erreurs. Essayez de la 'corriger' doucement dans la bonne direction. Si rien ne marche, relancez le jeu en rafraîchissant la page.",
+      "whoMade_q": "Qui a créé ce jeu ?",
+      "whoMade_a": "Moi. Seul. Les détails sont dans l'onglet 'À propos'.",
+      "suggest_q": "J'ai une suggestion... il y a peut-être des choses à améliorer...",
+      "suggest_a": "Honnêtement, pour être franc, je ne suis pas très motivé pour améliorer le projet. Si votre suggestion demande trop d'efforts, je vais probablement l'ignorer. Mais si vous tenez vraiment à me demander quelque chose, allez-y—mes coordonnées sont dans 'À propos'."
     }
   },
   "chat": {
@@ -117,7 +139,6 @@
     "gender_unknown": "inconnu",
     "agePrefix": "âge"
   },
-  
   "clues": {
     "all": "tout",
     "motive": "motif",
@@ -143,9 +164,32 @@
     "witnessedEvents": "Événements observés",
     "noData": "-",
     "betweenSeparator": " ↔ ",
-    "suspectColumns": ["name","gender","age","isGuilty","motive","alibi","verifiedBy"],
-    "weaponColumns": ["name","isMurderWeapon","foundOn","foundNear"],
-    "relColumns": ["between","type","secret","note"],
-    "eventColumns": ["time","description","witnesses","involves"]
+    "suspectColumns": [
+      "name",
+      "gender",
+      "age",
+      "isGuilty",
+      "motive",
+      "alibi",
+      "verifiedBy"
+    ],
+    "weaponColumns": [
+      "name",
+      "isMurderWeapon",
+      "foundOn",
+      "foundNear"
+    ],
+    "relColumns": [
+      "between",
+      "type",
+      "secret",
+      "note"
+    ],
+    "eventColumns": [
+      "time",
+      "description",
+      "witnesses",
+      "involves"
+    ]
   }
 }

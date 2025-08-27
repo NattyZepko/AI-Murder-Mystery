@@ -6,6 +6,13 @@ export function HowItWorksPage() {
   return (
     <div style={{ padding: 32, maxWidth: 800, margin: '0 auto', background: 'rgba(30,41,59,0.95)', color: '#e5e7eb', borderRadius: 12, boxShadow: '0 4px 24px #0004' }}>
       <h2 style={{ fontSize: 32, marginBottom: 16 }}>{en.how.title}</h2>
+      <div style={{ fontSize: 16, marginBottom: 12 }}>
+        {en.how.githubLinePrefix}
+        <a href="https://github.com/NattyZepko/AI-Murder-Mystery" target="_blank" rel="noopener noreferrer" style={{ color: '#60a5fa', textDecoration: 'underline', margin: '0 4px' }}>
+          {en.how.githubLineLinkText}
+        </a>
+        {en.how.githubLineSuffix}
+      </div>
       <p style={{ fontSize: 18, lineHeight: 1.7 }}>
         <strong>AI Murder Mystery</strong> {en.how.subtitle}
       </p>
@@ -29,14 +36,14 @@ export function HowItWorksPage() {
         </svg>
       </div>
       <ol style={{ fontSize: 17, lineHeight: 1.7, marginLeft: 24 }}>
-        <li><strong>Scenario Generation:</strong> The AI creates a coherent scenario with a victim, suspects, motives, weapons, alibis, and relationships. Every detail is procedurally generated, so no two games are the same.</li>
-        <li><strong>Consistency Rules:</strong> The system enforces logical constraints (e.g., only one true murderer, plausible clues) to ensure a fair and solvable mystery.</li>
-        <li><strong>Interrogation:</strong> You select suspects to question. Each suspect is role-played by the AI, which remembers prior dialogue and adapts its responses.</li>
-        <li><strong>Clue Extraction:</strong> After each conversation, the AI analyzes the dialogue to extract meaningful clues, which are added to your clue log.</li>
-        <li><strong>Deduction & Accusation:</strong> Review the clues, connect the dots, and submit your accusation when you think you've solved the case.</li>
-        <li><strong>Replayability:</strong> If you guess wrong, you can generate a new scenario and try again. Every playthrough is different!</li>
+        <li>{en.how.scenarioGeneration}</li>
+        <li>{en.how.consistencyRules}</li>
+        <li>{en.how.interrogation}</li>
+        <li>{en.how.clueExtraction}</li>
+        <li>{en.how.deductionAccusation}</li>
+        <li>{en.how.replayability}</li>
       </ol>
-  <h3 style={{ marginTop: 28, fontSize: 22 }}>{en.how.systemArchitecture}</h3>
+      <h3 style={{ marginTop: 28, fontSize: 22 }}>{en.how.systemArchitecture}</h3>
       {/* Improved Architecture Diagram (SVG, single AI backend) */}
       <div style={{ display: 'flex', justifyContent: 'center', margin: '24px 0' }}>
         <svg width="600" height="160" viewBox="0 0 600 160" style={{ background: 'none' }}>
@@ -64,34 +71,34 @@ export function HowItWorksPage() {
           </g>
         </svg>
       </div>
-  <h3 style={{ marginTop: 28, fontSize: 22 }}>{en.how.aiBackend}</h3>
+      <h3 style={{ marginTop: 28, fontSize: 22 }}>{en.how.aiBackend}</h3>
       <ul style={{ fontSize: 17, lineHeight: 1.7, marginLeft: 24 }}>
-        <li><strong>Unified AI Backend:</strong> The game uses a single AI backend to generate scenarios, role-play suspects, and extract clues.</li>
-        <li><strong>Reliable Experience:</strong> The backend ensures a consistent and uninterrupted gameplay experience.</li>
+        <li>{en.how.aiBackendUnified}</li>
+        <li>{en.how.aiBackendReliable}</li>
       </ul>
-  <p style={{ fontSize: 16, marginTop: 8 }}>{en.how.aiBackendDesc}</p>
-  <h3 style={{ marginTop: 28, fontSize: 22 }}>{en.how.behindScenesTitle}</h3>
+      <p style={{ fontSize: 16, marginTop: 8 }}>{en.how.aiBackendDesc}</p>
+      <h3 style={{ marginTop: 28, fontSize: 22 }}>{en.how.behindScenesTitle}</h3>
       <ul style={{ fontSize: 17, lineHeight: 1.7, marginLeft: 24 }}>
-        <li><strong>Scenario Engine:</strong> The backend builds and refines each case using scenario rules and normalization logic.</li>
-        <li><strong>Role-Playing AI:</strong> Each suspect is role-played by the AI, maintaining memory of your previous questions and their own alibis, motives, and secrets.</li>
-        <li><strong>Clue Mining:</strong> The AI extracts structured clues from free-form conversations, helping you keep track of important facts.</li>
-        <li><strong>Extensible Design:</strong> The system is built to be extended—add new clue types, scoring logic, or even new AI providers by editing the backend modules.</li>
+        <li>{en.how.scenarioEngine}</li>
+        <li>{en.how.rolePlayingAI}</li>
+        <li>{en.how.clueMining}</li>
+        <li>{en.how.extensibleDesign}</li>
       </ul>
-  <h3 style={{ marginTop: 28, fontSize: 22 }}>{en.how.technicalStackTitle}</h3>
+      <h3 style={{ marginTop: 28, fontSize: 22 }}>{en.how.technicalStackTitle}</h3>
       <ul style={{ fontSize: 17, lineHeight: 1.7, marginLeft: 24 }}>
-        <li><strong>Node.js + Express:</strong> Backend API for scenario generation, chat, and clue extraction.</li>
-        <li><strong>TypeScript & React:</strong> Modern, responsive client UI (this app) built with Vite.</li>
-        <li><strong>AI Backend:</strong> All scenario and dialogue logic is powered by a single AI backend.</li>
+        <li>{en.how.techStackNode}</li>
+        <li>{en.how.techStackReact}</li>
+        <li>{en.how.techStackAI}</li>
       </ul>
-  <h3 style={{ marginTop: 28, fontSize: 22 }}>{en.how.extendingTitle}</h3>
+      <h3 style={{ marginTop: 28, fontSize: 22 }}>{en.how.extendingTitle}</h3>
       <ul style={{ fontSize: 17, lineHeight: 1.7, marginLeft: 24 }}>
-        <li>Add new clue extraction logic in <code>src/clues.js</code>.</li>
-        <li>Experiment with scenario rules in <code>core/</code> and <code>src/scenarioGenerator.js</code>.</li>
-        <li>Swap or add AI providers by editing <code>src/ai.js</code>.</li>
-        <li>Contribute new features, UI improvements, or scenario types via pull requests!</li>
+        <li>{en.how.extendingClueLogic}</li>
+        <li>{en.how.extendingScenarioRules}</li>
+        <li>{en.how.extendingAIProviders}</li>
+        <li>{en.how.extendingContribute}</li>
       </ul>
       <p style={{ fontSize: 16, marginTop: 24 }}>
-        <strong>Enjoy exploring, interrogating, and solving the mystery!</strong>
+        <strong>{en.how.enjoyExploring}</strong>
       </p>
     </div>
   );
