@@ -13,6 +13,7 @@ import { DebugPanel } from './components/DebugPanel';
 import { colorizeText } from './utils/colorize';
 import { formatDuration } from './utils/time';
 import { buildSystemForSuspect } from './utils/buildSystem';
+import en from './i18n/English.json';
 
 // Set the body background to match the app background
 if (typeof document !== 'undefined') {
@@ -157,8 +158,8 @@ function App() {
       try {
         sc = await generateScenario();
       } catch (e2: any) {
-        setError(e2.message || 'Failed to generate scenario');
-      }
+          setError(e2.message || en.main.generateScenario);
+        }
     }
     if (sc) {
       try {
@@ -265,15 +266,15 @@ function App() {
             ⏱ {formatDuration(elapsedMs)}
           </div>
         )}
-        <h1>Murder Mystery</h1>
-        <p>Generate a scenario and inspect suspects, relationships, and witnessed events. (It might take a minute)</p>
-        <p>Be warned! Refreshing, closing, or moving to another page will reset the entire game! (but you can move tabs within this site)</p>
+  <h1>{en.main.title}</h1>
+  <p>{en.main.intro1}</p>
+  <p>{en.main.intro2}</p>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
           {(!scenario || solved) && (
-            <button disabled={loading} onClick={generate}>{loading ? 'Generating…' : (solved ? 'Generate New Mystery' : 'Generate Scenario')}</button>
+            <button disabled={loading} onClick={generate}>{loading ? en.main.generating : (solved ? en.main.generateNewMystery : en.main.generateScenario)}</button>
           )}
           {scenario && (
-            <button onClick={() => setDebug(v => !v)}>{debug ? 'Hide Debug' : 'Show Debug'}</button>
+            <button onClick={() => setDebug(v => !v)}>{debug ? en.main.hideDebug : en.main.showDebug}</button>
           )}
         </div>
         {retryNotice && <p style={{ color: 'crimson', margin: '6px 0' }}>{retryNotice}</p>}
@@ -286,7 +287,7 @@ function App() {
               {scenario.victim && <p><strong>Victim:</strong> {scenario.victim.name} — <em>{scenario.victim.timeOfDeath}</em></p>}
               <div style={{ display: 'grid', gridTemplateColumns: '320px minmax(600px, 1fr) 360px', gap: 20, alignItems: 'start', marginTop: 8 }}>
                 <div>
-                  <h3>Suspects</h3>
+                  <h3>{en.main.suspectsTitle}</h3>
                   <ul>
                     {scenario.suspects?.map((s: any) => (
                       <li key={s.id}>
@@ -320,8 +321,8 @@ function App() {
                   </ul>
                 </div>
                 <div>
-                  <h3>Interrogate</h3>
-                        {!activeSuspectId && <p>Select a suspect to start a conversation.</p>}
+                  <h3>{en.main.interrogateTitle}</h3>
+                        {!activeSuspectId && <p>{en.main.selectSuspectPrompt}</p>}
                         {activeSuspectId && (
                           <div style={{ background: '#1e293b', borderRadius: 10, padding: 12, color: '#f3f4f6', minHeight: 320 }}>
                             <ChatPanel
@@ -337,22 +338,24 @@ function App() {
                 <div>
                   <SubmitPanel scenario={scenario} mentionedWeapons={mentionedWeapons} onSolved={handleSolved} />
                   <div style={{ marginTop: 16 }}>
-                    <h3>Clues</h3>
+                    <h3>{en.main.cluesTitle}</h3>
                     <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', margin: '6px 0 8px' }}>
-                      {['all','motive','contradiction','alibi','witness','weapon','location','time'].map(tab => {
+                      {Object.values(en.clues).map((tabLabel) => tabLabel).map((tab) => {
+                        // map returns values like 'all','motive', ... we use the same keys
+                        const key = tab;
                         const isActive = activeClueTab === tab;
-                        const count = tab === 'all' ? clues.length : clues.filter(c => c.type === tab).length;
-                        if (tab !== 'all' && count === 0) return null;
+                        const count = key === 'all' ? clues.length : clues.filter(c => c.type === key).length;
+                        if (key !== 'all' && count === 0) return null;
                         return (
-                          <button key={tab} onClick={() => setActiveClueTab(tab)}
+                          <button key={key} onClick={() => setActiveClueTab(key)}
                             style={{ padding: '4px 8px', borderRadius: 999, border: '1px solid #ccc', background: isActive ? '#111827' : '#fff', color: isActive ? '#fff' : '#111827', fontSize: 12 }}>
-                            {tab} ({count})
+                            {key} ({count})
                           </button>
                         );
                       })}
                     </div>
                     {clues.length === 0 ? (
-                      <p>No clues yet.</p>
+                      <p>{en.main.noClues}</p>
                     ) : (
                       <ul style={{ maxHeight: '32vh', overflow: 'auto', paddingRight: 6 }}>
                         {(activeClueTab === 'all' ? clues : clues.filter(c => c.type === activeClueTab)).map((c, i) => (
@@ -366,9 +369,9 @@ function App() {
                       </ul>
                     )}
                     <div style={{ marginTop: 8 }}>
-                      <div style={{ fontWeight: 600 }}>Weapons mentioned</div>
+                      <div style={{ fontWeight: 600 }}>{en.main.weaponsMentioned}</div>
                       {Array.from(mentionedWeapons).length === 0 ? (
-                        <div>- none yet</div>
+                        <div>{en.main.noneYet}</div>
                       ) : (
                         <ul>
                           {Array.from(mentionedWeapons).map((w) => (
@@ -381,9 +384,9 @@ function App() {
                 </div>
               </div>
             </div>
-            {debug && scenario.relationships?.length > 0 && (
+      {debug && scenario.relationships?.length > 0 && (
               <>
-                <h3>Relationships</h3>
+        <h3>{en.main.relationshipsTitle}</h3>
                 <ul>
                   {scenario.relationships.map((r: any, i: number) => {
                     const nameById: Record<string, string> = Object.fromEntries((scenario.suspects ?? []).map((s: any) => [s.id, s.name]));
@@ -396,9 +399,9 @@ function App() {
                 </ul>
               </>
             )}
-            {debug && scenario.witnessedEvents?.length > 0 && (
+      {debug && scenario.witnessedEvents?.length > 0 && (
               <>
-                <h3>Witnessed Events</h3>
+        <h3>{en.main.witnessedEventsTitle}</h3>
                 <ul>
                   {scenario.witnessedEvents.map((w: any, i: number) => {
                     const nameById: Record<string, string> = Object.fromEntries((scenario.suspects ?? []).map((s: any) => [s.id, s.name]));
@@ -424,7 +427,7 @@ function App() {
             )}
             {debug && scenario && (
               <div style={{ marginTop: 16 }}>
-                <h3>Debug: AI Data</h3>
+                <h3>{en.debug.title}: AI Data</h3>
                 <DebugPanel scenario={scenario} />
               </div>
             )}

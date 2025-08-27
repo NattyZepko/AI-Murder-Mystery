@@ -1,4 +1,5 @@
 import React from 'react'
+import en from '../i18n/English.json'
 
 export function DebugPanel({ scenario }: { scenario: any }) {
   const [suspectSort, setSuspectSort] = React.useState<{ key: string, dir: 'asc' | 'desc' }>({ key: 'name', dir: 'asc' })
@@ -61,22 +62,22 @@ export function DebugPanel({ scenario }: { scenario: any }) {
         <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #ccc' }}>
           <thead>
             <tr>
-              <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc', padding: 6, borderRight: '1px solid #ddd' }}>Field</th>
-              <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc', padding: 6, borderRight: '1px solid #ddd' }}>Value</th>
+              <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc', padding: 6, borderRight: '1px solid #ddd' }}>{en.debug.field}</th>
+              <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc', padding: 6, borderRight: '1px solid #ddd' }}>{en.debug.value}</th>
             </tr>
           </thead>
           <tbody>
-            <tr><td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>Title</td><td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{scenario.title}</td></tr>
-            <tr><td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>Setting</td><td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{scenario.setting}</td></tr>
-            <tr><td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>Victim</td><td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{scenario.victim?.name} — {scenario.victim?.timeOfDeath}</td></tr>
-            <tr><td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>Truth (guiltySuspectId)</td><td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{scenario.truth?.guiltySuspectId} {nameById[scenario.truth?.guiltySuspectId] ? `(${nameById[scenario.truth?.guiltySuspectId]})` : ''}</td></tr>
-            <tr><td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>Truth (murderWeaponId)</td><td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{scenario.truth?.murderWeaponId}</td></tr>
-            <tr><td style={{ padding: 6, borderRight: '1px solid #eee' }}>Motive core</td><td style={{ padding: 6, borderRight: '1px solid #eee' }}>{scenario.truth?.motiveCore}</td></tr>
+            <tr><td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{en.debug.title}</td><td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{scenario.title}</td></tr>
+            <tr><td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{en.debug.setting}</td><td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{scenario.setting}</td></tr>
+            <tr><td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{en.debug.victim}</td><td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{scenario.victim?.name} — {scenario.victim?.timeOfDeath}</td></tr>
+            <tr><td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{en.debug.truthGuilty}</td><td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{scenario.truth?.guiltySuspectId} {nameById[scenario.truth?.guiltySuspectId] ? `(${nameById[scenario.truth?.guiltySuspectId]})` : ''}</td></tr>
+            <tr><td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{en.debug.truthWeapon}</td><td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{scenario.truth?.murderWeaponId}</td></tr>
+            <tr><td style={{ padding: 6, borderRight: '1px solid #eee' }}>{en.debug.motiveCore}</td><td style={{ padding: 6, borderRight: '1px solid #eee' }}>{scenario.truth?.motiveCore}</td></tr>
           </tbody>
         </table>
       </div>
       <div>
-        <h4>Suspects</h4>
+        <h4>{en.debug.suspects}</h4>
         <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #ccc' }}>
           <thead>
             <tr>
@@ -105,11 +106,11 @@ export function DebugPanel({ scenario }: { scenario: any }) {
         </table>
       </div>
       <div>
-        <h4>Weapons</h4>
+        <h4>{en.debug.weapons}</h4>
         <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #ccc' }}>
           <thead>
             <tr>
-              {['name','isMurderWeapon','foundOn','foundNear'].map((h) => (
+              {en.debug.weaponColumns.map((h: string) => (
                 <th key={h} onClick={() => setWeaponSort(prev => ({ key: h === 'foundOn' ? 'foundOnSuspectId' : h === 'foundNear' ? 'foundNearSuspectId' : h, dir: prev.key === (h === 'foundOn' ? 'foundOnSuspectId' : h === 'foundNear' ? 'foundNearSuspectId' : h) && prev.dir === 'asc' ? 'desc' : 'asc' }))}
                     style={{ textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #ccc', padding: 6, borderRight: '1px solid #ddd' }}>
                   {h}
@@ -132,11 +133,11 @@ export function DebugPanel({ scenario }: { scenario: any }) {
       </div>
       {sortedRels.length > 0 && (
         <div>
-          <h4>Relationships</h4>
+          <h4>{en.debug.relationships}</h4>
           <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #ccc' }}>
             <thead>
               <tr>
-                {['between','type','secret','note'].map((h) => (
+                {en.debug.relColumns.map((h: string) => (
                   <th key={h} onClick={() => setRelSort(prev => ({ key: h === 'secret' ? 'isSecret' : h, dir: prev.key === (h === 'secret' ? 'isSecret' : h) && prev.dir === 'asc' ? 'desc' : 'asc' }))}
                       style={{ textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #ccc', padding: 6, borderRight: '1px solid #ddd' }}>
                     {h}
@@ -148,7 +149,7 @@ export function DebugPanel({ scenario }: { scenario: any }) {
             <tbody>
               {sortedRels.map((r: any, i: number) => (
                 <tr key={i}>
-                  <td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{[r.between?.[0], r.between?.[1]].map((id: string) => nameById[id] || id).join(' ↔ ')}</td>
+                  <td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{[r.between?.[0], r.between?.[1]].map((id: string) => nameById[id] || id).join(en.debug.betweenSeparator)}</td>
                   <td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{r.type}</td>
                   <td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{String(Boolean(r.isSecret))}</td>
                   <td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{r.note || ''}</td>
@@ -160,11 +161,11 @@ export function DebugPanel({ scenario }: { scenario: any }) {
       )}
       {sortedEvents.length > 0 && (
         <div>
-          <h4>Witnessed Events</h4>
+          <h4>{en.debug.witnessedEvents}</h4>
           <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #ccc' }}>
             <thead>
               <tr>
-                {['time','description','witnesses','involves'].map((h) => (
+                {en.debug.eventColumns.map((h: string) => (
                   <th key={h} onClick={() => setEventSort(prev => ({ key: h, dir: prev.key === h && prev.dir === 'asc' ? 'desc' : 'asc' }))}
                       style={{ textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #ccc', padding: 6, borderRight: '1px solid #ddd' }}>
                     {h}

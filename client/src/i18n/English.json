@@ -1,0 +1,126 @@
+{
+  "topbar": {
+    "game": "Game",
+    "about": "About Me",
+    "how": "How It Works",
+    "qa": "Q&A",
+    "languageTitle": "Language"
+  },
+  "about": {
+    "title": "About Me",
+    "p1": "Hi! I'm the creator of this AI-powered murder mystery game.",
+    "p1b": "I love combining storytelling, technology, and interactive experiences.",
+    "p1c": "This project is a blend of my passion for games, AI, and creative problem-solving.",
+    "p2": "If you enjoy the game or have feedback, feel free to reach out!"
+  },
+  "how": {
+    "title": "How It Works",
+    "subtitle": "AI Murder Mystery is an interactive detective experience powered by advanced AI models. Each game session generates a brand new, unique murder case for you to solve by interrogating suspects, collecting clues, and making your final accusation.",
+    "gameFlow": "Game Flow",
+    "startGame": "Start Game",
+    "generateScenario": "Generate Scenario",
+    "interrogate": "Interrogate",
+    "accuse": "Accuse",
+    "systemArchitecture": "System Architecture",
+    "reactClient": "React Client",
+    "expressApi": "Express API",
+    "expressApiDetail": "Scenario, Chat, Clues",
+    "aiBackend": "AI Backend",
+    "aiBackendDesc": "The AI backend powers all scenario generation, suspect dialogue, and clue extraction for your game session.",
+    "behindScenesTitle": "Behind the Scenes",
+    "technicalStackTitle": "Technical Stack",
+    "extendingTitle": "Extending & Customizing"
+  },
+  "qa": {
+    "title": "Q&A",
+    "items": {
+      "whatGame_q": "What is this game?",
+      "whatGame_a": "This is an AI-powered murder mystery game. You play as a detective, questioning suspects and solving the case using clues and logic.",
+      "howPlay_q": "How do I play?",
+      "howPlay_a": "Read the scenario, talk to suspects, gather clues, and try to deduce who the culprit is. Use the chat to ask questions and submit your accusation when you think you know who did it, and with what weapon. If you don't have the correct weapon, try investigating some more.",
+      "canLose_q": "Can I lose the game?",
+      "canLose_a": "No. If you accuse the wrong suspect, the case remains unsolved, but you can just keep investigating or guessing. The Engine is entirely run by AI, so it will adapt to your actions, but it isn't perfect. If you encounter any troubles at all, try a new scenario.",
+      "sameStory_q": "Is the story the same every time?",
+      "sameStory_a": "No, each game generates a new scenario with different suspects, motives, and clues.",
+      "repeat_q": "Then can I try the same scenario again? Or repeat a scenario? Or ask for a specific scenario?",
+      "repeat_a": "No.",
+      "glitch_q": "The AI is misbehaving / glitchy / doesn't remember things / is wrong!",
+      "glitch_a": "Yeah, it's just an AI after all. Try correcting it, pointing it in the right direction, and if all else fails, try refreshing the page or starting a new game.",
+      "whoMade_q": "Who made this?",
+      "whoMade_a": "This game was created by Natty Zepko using React and AI technologies.",
+      "suggest_q": "I have a suggestion...",
+      "suggest_a": "I am mostly done with the project, but I am open to feedback and suggestions for improvement. Contact me at natty.zepko@gmail.com"
+    }
+  },
+  "chat": {
+    "you": "You",
+    "suspect": "Suspect",
+    "placeholder": "Ask a question…",
+    "thinking": "Thinking…",
+    "send": "Send"
+  },
+  "submit": {
+    "title": "Submit Conclusion",
+    "suspect": "Suspect",
+    "weaponOnlyRevealed": "Weapon (only revealed)",
+    "noWeaponsRevealed": "No weapons revealed by dialogue yet.",
+    "select": "Select...",
+    "pickSuspect": "Pick a suspect.",
+    "notEnoughEvidence": "You have not collected enough evidence yet. Mention some weapons in suspects' dialogue.",
+    "pickWeapon": "Pick a weapon from the revealed list.",
+    "correctPrefix": "Correct.",
+    "wrong": "Not quite. Keep investigating and try again.",
+    "tryIn": "Try in {s}s",
+    "submit": "Submit"
+  },
+  "main": {
+    "title": "Murder Mystery",
+    "intro1": "Generate a scenario and inspect suspects, relationships, and witnessed events. (It might take a minute)",
+    "intro2": "Be warned! Refreshing, closing, or moving to another page will reset the entire game! (but you can move tabs within this site)",
+    "generateScenario": "Generate Scenario",
+    "generateNewMystery": "Generate New Mystery",
+    "showDebug": "Show Debug",
+    "hideDebug": "Hide Debug",
+    "selectSuspectPrompt": "Select a suspect to start a conversation.",
+    "suspectsTitle": "Suspects",
+    "interrogateTitle": "Interrogate",
+  "generating": "Generating…",
+  "relationshipsTitle": "Relationships",
+  "witnessedEventsTitle": "Witnessed Events",
+    "cluesTitle": "Clues",
+    "noClues": "No clues yet.",
+    "weaponsMentioned": "Weapons mentioned",
+    "noneYet": "- none yet"
+  },
+  "clues": {
+    "all": "all",
+    "motive": "motive",
+    "contradiction": "contradiction",
+    "alibi": "alibi",
+    "witness": "witness",
+    "weapon": "weapon",
+    "location": "location",
+    "time": "time"
+  }
+  ,
+  "debug": {
+    "field": "Field",
+    "value": "Value",
+    "title": "Title",
+    "setting": "Setting",
+    "victim": "Victim",
+    "truthGuilty": "Truth (guiltySuspectId)",
+    "truthWeapon": "Truth (murderWeaponId)",
+    "motiveCore": "Motive core",
+    "suspects": "Suspects",
+    "weapons": "Weapons",
+    "relationships": "Relationships",
+    "witnessedEvents": "Witnessed Events",
+    "noData": "-",
+    "betweenSeparator": " ↔ ",
+    "suspectColumns": ["name","gender","age","isGuilty","motive","alibi","verifiedBy"],
+    "weaponColumns": ["name","isMurderWeapon","foundOn","foundNear"],
+    "relColumns": ["between","type","secret","note"],
+    "eventColumns": ["time","description","witnesses","involves"]
+  }
+}

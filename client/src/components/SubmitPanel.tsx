@@ -1,4 +1,5 @@
 import React from 'react'
+import en from '../i18n/English.json'
 
 export function SubmitPanel({ scenario, mentionedWeapons, onSolved }: { scenario: any, mentionedWeapons: Set<string>, onSolved?: () => void }) {
   const [selectedSuspectIndex, setSelectedSuspectIndex] = React.useState<number>(-1)
@@ -33,9 +34,9 @@ export function SubmitPanel({ scenario, mentionedWeapons, onSolved }: { scenario
 
   const submit = () => {
     if (cooldown > 0) return
-    if (selectedSuspectIndex < 0) { setResult('Pick a suspect.'); return }
-    if (revealedWeapons.length === 0) { setResult('You have not collected enough evidence yet. Mention some weapons in suspects\' dialogue.'); return }
-    if (selectedWeaponIndex < 0) { setResult('Pick a weapon from the revealed list.'); return }
+  if (selectedSuspectIndex < 0) { setResult(en.submit.pickSuspect); return }
+  if (revealedWeapons.length === 0) { setResult(en.submit.notEnoughEvidence); return }
+  if (selectedWeaponIndex < 0) { setResult(en.submit.pickWeapon); return }
     const suspect = suspects[selectedSuspectIndex]
     const weapon = revealedWeapons[selectedWeaponIndex]
     const truthGuiltyId = scenario?.truth?.guiltySuspectId
@@ -45,33 +46,33 @@ export function SubmitPanel({ scenario, mentionedWeapons, onSolved }: { scenario
     if (okSuspect && okWeapon) {
       const motive = scenario?.truth?.motiveCore || (suspect?.motive || '')
       const contras: string[] = Array.isArray(scenario?.truth?.keyContradictions) ? scenario.truth.keyContradictions : []
-      setResult(`Correct. ${suspect.name} used the ${weapon.name}. Motive: ${motive}${contras.length ? ' | Key contradictions: ' + contras.join('; ') : ''}`)
+  setResult(`${en.submit.correctPrefix} ${suspect.name} used the ${weapon.name}. Motive: ${motive}${contras.length ? ' | Key contradictions: ' + contras.join('; ') : ''}`)
       if (onSolved) onSolved()
     } else {
-      setResult('Not quite. Keep investigating and try again.')
+  setResult(en.submit.wrong)
       startCooldown(5)
     }
   }
 
   return (
     <div style={{ border: '1px solid #ddd', borderRadius: 8, padding: 12 }}>
-      <h3>Submit Conclusion</h3>
+  <h3>{en.submit.title}</h3>
       <div>
-        <div style={{ fontWeight: 600, marginTop: 6 }}>Suspect</div>
+        <div style={{ fontWeight: 600, marginTop: 6 }}>{en.submit.suspect}</div>
         <select value={selectedSuspectIndex} onChange={e => setSelectedSuspectIndex(parseInt(e.target.value, 10))}>
-          <option value={-1}>Select...</option>
+          <option value={-1}>{en.submit.select}</option>
           {suspects.map((s, idx) => (
             <option key={s.id} value={idx}>{idx + 1}. {s.name} ({s.gender}, {s.age})</option>
           ))}
         </select>
       </div>
       <div>
-        <div style={{ fontWeight: 600, marginTop: 6 }}>Weapon (only revealed)</div>
+        <div style={{ fontWeight: 600, marginTop: 6 }}>{en.submit.weaponOnlyRevealed}</div>
         {revealedWeapons.length === 0 ? (
-          <div style={{ color: '#666' }}>No weapons revealed by dialogue yet.</div>
+          <div style={{ color: '#666' }}>{en.submit.noWeaponsRevealed}</div>
         ) : (
           <select value={selectedWeaponIndex} onChange={e => setSelectedWeaponIndex(parseInt(e.target.value, 10))}>
-            <option value={-1}>Select...</option>
+            <option value={-1}>{en.submit.select}</option>
             {revealedWeapons.map((w, idx) => (
               <option key={w.id} value={idx}>{idx + 1}. {w.name}</option>
             ))}
@@ -80,7 +81,7 @@ export function SubmitPanel({ scenario, mentionedWeapons, onSolved }: { scenario
       </div>
       <div style={{ marginTop: 10 }}>
         <button onClick={submit} disabled={cooldown > 0}>
-          {cooldown > 0 ? `Try in ${cooldown}s` : 'Submit'}
+          {cooldown > 0 ? en.submit.tryIn.replace('{s}', String(cooldown)) : en.submit.submit}
         </button>
       </div>
       {result && <div style={{ marginTop: 8 }}>{result}</div>}

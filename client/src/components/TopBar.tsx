@@ -1,4 +1,5 @@
 import React from 'react';
+import en from '../i18n/English.json';
 
 type PageType = 'game' | 'about' | 'how' | 'qa';
 interface TopBarProps {
@@ -43,7 +44,7 @@ export function TopBar({ currentPage, onNavigate }: TopBarProps) {
           }}
           onClick={() => onNavigate('game')}
         >
-          Game
+          {en.topbar.game}
         </button>
         <button
           style={{
@@ -56,7 +57,7 @@ export function TopBar({ currentPage, onNavigate }: TopBarProps) {
           }}
           onClick={() => onNavigate('about')}
         >
-          About Me
+          {en.topbar.about}
         </button>
         <button
           style={{
@@ -69,7 +70,7 @@ export function TopBar({ currentPage, onNavigate }: TopBarProps) {
           }}
           onClick={() => onNavigate('how')}
         >
-          How It Works
+          {en.topbar.how}
         </button>
         <button
           style={{
@@ -82,12 +83,12 @@ export function TopBar({ currentPage, onNavigate }: TopBarProps) {
           }}
           onClick={() => onNavigate('qa')}
         >
-          Q&amp;A
+          {en.topbar.qa}
         </button>
       </div>
 
       <div style={{ marginLeft: 'auto' }}>
-        <label htmlFor="language-select" style={{ marginRight: 8, fontSize: 14, color: '#ddd' }} title="Language">🌍</label>
+  <label htmlFor="language-select" style={{ marginRight: 8, fontSize: 14, color: '#ddd' }} title={en.topbar.languageTitle}>🌍</label>
         <select
           id="language-select"
           value={language}

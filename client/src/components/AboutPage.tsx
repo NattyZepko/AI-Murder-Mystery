@@ -1,17 +1,16 @@
 import React from 'react';
+import en from '../i18n/English.json';
 
 export function AboutPage() {
   return (
     <div style={{ padding: 32 }}>
-      <h2>About Me</h2>
+      <h2>{en.about.title}</h2>
       <p>
-        Hi! I'm the creator of this AI-powered murder mystery game.<br/>
-        I love combining storytelling, technology, and interactive experiences.<br/>
-        This project is a blend of my passion for games, AI, and creative problem-solving.
+        {en.about.p1}<br/>
+        {en.about.p1b}<br/>
+        {en.about.p1c}
       </p>
-      <p>
-        If you enjoy the game or have feedback, feel free to reach out!
-      </p>
+      <p>{en.about.p2}</p>
     </div>
   );
 }
