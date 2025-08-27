@@ -166,12 +166,15 @@ async function fetchJsonWithRetries({ system, user, options = {}, schemaExample 
     const call = async (sys, usr, opts) => await chatWithAI({ system: sys, messages: [{ role: 'user', content: usr }], options: opts });
     let res = await call(system, user, options);
     let content = String(res.message?.content ?? '').trim();
+    const originalContent = content;
+    const repairHistory = [{ type: 'initial', content: originalContent }];
     console.log(`fetchJsonWithRetries: received ${partName} raw length=${String(content).length}`);
     console.log(String(content).slice(0, 1200));
     // Try a quick local sanitization before asking the model to repair
     try {
         const attempt = attemptQuickFixJsonString(content);
         if (attempt !== content) {
+            repairHistory.push({ type: 'quickfix-before-parse', content: attempt });
             console.log(`fetchJsonWithRetries: quick-fix changed content for ${partName}, trying parse`);
             console.log(String(attempt).slice(0, 800));
         }
@@ -195,6 +198,7 @@ async function fetchJsonWithRetries({ system, user, options = {}, schemaExample 
             const repairOpts = Object.assign({}, options, { temperature: 0.0, max_tokens: Math.min(1200, (options.max_tokens || 800)) });
             const repairRes = await call(repairSystem, repairUser, repairOpts);
             content = String(repairRes.message?.content ?? '').trim();
+            repairHistory.push({ type: `repair-${i + 1}`, content });
             console.log(`fetchJsonWithRetries: repair reply length=${String(content).length}`);
             console.log(String(content).slice(0, 1200));
             // Try quick fix on repaired content as well
@@ -207,7 +211,35 @@ async function fetchJsonWithRetries({ system, user, options = {}, schemaExample 
         // Last-ditch: try quick-fix on the final content before throwing
         const quick = attemptQuickFixJsonString(content);
         try { return parseJsonContent(quick); } catch (_) { }
-        throw new Error(`Failed to parse ${partName} after ${retries + 1} attempts. Last raw content (truncated): ` + String(content).slice(0, 2000));
+
+        // Prepare diagnostics: print parse failure details and save a log
+        try {
+            console.error(`\nfetchJsonWithRetries: FAILED to parse ${partName} after ${retries + 1} attempts.`);
+            console.error('--- Parse diagnostics: begin ---');
+            console.error('Original AI reply (truncated to 8000 chars):');
+            console.error(String(originalContent).slice(0, 8000));
+            console.error('\nRepair replies:');
+            repairHistory.forEach((r, idx) => {
+                console.error(`[${idx}] type=${r.type} length=${String(r.content || '').length}`);
+                console.error(String(r.content || '').slice(0, 1600));
+            });
+            console.error('--- Parse diagnostics: end ---\n');
+            // Save diagnostics to samples for later inspection
+            try {
+                const fn = path.resolve(__dirname, '..', 'samples', `bad_ai_response_${partName.replace(/[^a-z0-9_-]/gi, '')}_${Date.now()}.log`);
+                const dump = [];
+                dump.push(`PART: ${partName}`);
+                dump.push(`SCHEMA EXAMPLE: \n${schemaExample}\n`);
+                dump.push('=== ORIGINAL ===');
+                dump.push(originalContent || '');
+                dump.push('\n=== REPAIRS ===');
+                repairHistory.forEach(r => { dump.push(`--- ${r.type} ---`); dump.push(r.content || ''); });
+                fs.writeFileSync(fn, dump.join('\n\n'), 'utf8');
+                console.error('Saved diagnostics to', fn);
+            } catch (_) { /* ignore file write errors */ }
+        } catch (_) { }
+
+        throw new Error(`Failed to parse ${partName} after ${retries + 1} attempts. See terminal and samples/ for diagnostics.`);
     }
 }
 

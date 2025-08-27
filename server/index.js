@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const fs = require('fs');
 const path = require('path');
 const { generateScenario, applyScenarioRules } = require('../core');
 const { chatWithAI, AI_PROVIDER, GOOGLE_MODEL, OPENAI_MODEL, OLLAMA_MODEL } = require('../src/ai');
@@ -22,6 +23,29 @@ app.post('/api/scenario', async (req, res) => {
     scenario = applyScenarioRules(scenario);
     res.json({ scenario });
   } catch (e) {
+    console.error('Error generating scenario:', e && e.stack ? e.stack : e);
+    // If this is a scenario-malformed error, try to surface any diagnostics files produced
+    try {
+      const msg = String(e && e.message ? e.message : '').toLowerCase();
+      if (msg.includes('scenario malformed') || msg.includes('could not resolve a guilty suspect') || msg.includes('missing truth')) {
+        const samplesDir = path.resolve(__dirname, '..', 'samples');
+        if (fs.existsSync(samplesDir)) {
+          const files = fs.readdirSync(samplesDir).filter(f => f.startsWith('bad_ai_response_')).sort().reverse();
+          if (files.length) {
+            const recent = files[0];
+            const p = path.join(samplesDir, recent);
+            try {
+              const txt = fs.readFileSync(p, 'utf8');
+              console.error('Found diagnostics file for malformed scenario:', recent);
+              console.error(String(txt).slice(0, 8000));
+              return res.status(500).json({ error: e.message, diagnosticsFile: recent, diagnosticsPreview: String(txt).slice(0, 2000) });
+            } catch (readErr) {
+              console.error('Failed to read diagnostics file:', readErr && readErr.message ? readErr.message : readErr);
+            }
+          }
+        }
+      }
+    } catch (_) { }
     res.status(500).json({ error: e.message });
   }
 });
