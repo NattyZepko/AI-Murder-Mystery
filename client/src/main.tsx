@@ -10,6 +10,9 @@ import { TopBar } from './components/TopBar';
 import { AvatarFace } from './components/AvatarFace';
 import { SubmitPanel } from './components/SubmitPanel';
 import { DebugPanel } from './components/DebugPanel';
+import { colorizeText } from './utils/colorize';
+import { formatDuration } from './utils/time';
+import { buildSystemForSuspect } from './utils/buildSystem';
 
 // Set the body background to match the app background
 if (typeof document !== 'undefined') {
@@ -102,54 +105,8 @@ function App() {
     suspects.forEach((s: any) => { out[s.name] = suspectColorById[s.id]; });
     return out;
   }, [scenario, suspectColorById]);
-  const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const colorize = (text: string) => {
-    let out = text;
-  // Helper for thinner white outline
-  const outline = 'text-shadow: -0.5px -0.5px 0 #000000ff, 0.5px -0.5px 0 #000000ff, -0.5px 0.5px 0 #000000ff, 0.5px 0.5px 0 #000000ff;';
-    // Color full weapon names (case-insensitive, always yellow)
-    const weaponNames = Object.keys(weaponKeywordMap);
-    if (weaponNames.length) {
-      const pattern = new RegExp(`\\b(${weaponNames.map(escapeRe).sort((a,b)=>b.length-a.length).join('|')})\\b`, 'gi');
-      out = out.replace(pattern, (m) => `<span style="color:#b58900;${outline}">${m}</span>`);
-    }
-    // Color weapon tokens (case-insensitive, always yellow)
-    const weaponTokens = Array.from(new Set(Object.values(weaponKeywordMap).flat()));
-    if (weaponTokens.length) {
-      const pattern = new RegExp(`\\b(${weaponTokens.map(escapeRe).sort((a,b)=>b.length-a.length).join('|')})\\b`, 'gi');
-      out = out.replace(pattern, (m) => `<span style="color:#b58900;${outline}">${m}</span>`);
-    }
-    // Color full suspect names (case-insensitive, use correct color)
-    const suspectNames = Object.keys(suspectNameToColor);
-    if (suspectNames.length) {
-      const pattern = new RegExp(`\\b(${suspectNames.map(escapeRe).sort((a,b)=>b.length-a.length).join('|')})\\b`, 'gi');
-      out = out.replace(pattern, (m) => {
-        // Find the actual name in suspectNames that matches (case-insensitive)
-        const matchName = suspectNames.find(n => n.toLowerCase() === m.toLowerCase());
-        const color = matchName ? suspectNameToColor[matchName] : '#dc2626';
-        return `<span style="color:${color};${outline}">${m}</span>`;
-      });
-    }
-    // Color suspect tokens (case-insensitive, use correct color)
-    const suspectTokens = Object.keys(suspectTokenToColor);
-    if (suspectTokens.length) {
-      const pattern = new RegExp(`\\b(${suspectTokens.map(escapeRe).sort((a,b)=>b.length-a.length).join('|')})\\b`, 'gi');
-      out = out.replace(pattern, (m) => {
-        const key = m.toLowerCase();
-        const color = suspectTokenToColor[key] || '#dc2626';
-        return `<span style="color:${color};${outline}">${m}</span>`;
-      });
-    }
-    return out;
-  };
-  const formatDuration = (ms: number) => {
-    const totalSeconds = Math.max(0, Math.floor(ms / 1000));
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-    const pad = (n: number) => String(n).padStart(2, '0');
-    return hours > 0 ? `${pad(hours)}:${pad(minutes)}:${pad(seconds)}` : `${pad(minutes)}:${pad(seconds)}`;
-  };
+  // colorize moved to util
+  // formatDuration moved to util
 
   React.useEffect(() => {
     if (startTime && !solved) {
@@ -236,7 +193,7 @@ function App() {
     if (!activeSuspectId || !scenario) return;
     const suspect = (scenario.suspects ?? []).find((s: any) => s.id === activeSuspectId);
     if (!suspect) return;
-    const system = buildSystem(suspect, scenario);
+  const system = buildSystemForSuspect(suspect, scenario);
     const next: ChatMessage[] = [...messages, { role: 'user' as const, content: text }];
     setMessages(next);
     try {
@@ -284,7 +241,7 @@ function App() {
     } catch (err: any) {
       setMessages([...next, { role: 'assistant' as const, content: `Error: ${err.message}` }]);
     } finally {
-      setThinking(false);
+  setThinking(false);
     }
   };
 
@@ -298,44 +255,7 @@ function App() {
     }
   };
 
-  const buildSystem = (suspect: any, sc: any) => {
-    const redact = (obj: any, keys: string[]) => {
-      if (!obj || typeof obj !== 'object') return obj;
-      const out: any = Array.isArray(obj) ? [] : {};
-      for (const k of Object.keys(obj)) {
-        if (keys.includes(k)) continue;
-        const v: any = (obj as any)[k];
-        out[k] = (v && typeof v === 'object') ? redact(v, keys) : v;
-      }
-      return out;
-    };
-    const safeSuspect = redact(suspect, ['isGuilty']);
-    const safeWeapons = (sc.weapons ?? []).map((w: any) => redact(w, ['isMurderWeapon']));
-    const suspectsById: Record<string, any> = Object.fromEntries((sc.suspects ?? []).map((s: any) => [s.id, s]));
-    const verifiers = (suspect.alibiVerifiedBy ?? []).map((id: string) => suspectsById[id]).filter(Boolean);
-    const weaponsLinked = (sc.weapons ?? []).filter((w: any) => w.foundOnSuspectId === suspect.id || w.foundNearSuspectId === suspect.id);
-    const shared = sc.sharedStory || 'Shared account of the evening; keep your story consistent.';
-    return [
-      'You are roleplaying as a suspect in a murder mystery.',
-      'Stay in character; do not reveal meta info or the culprit.',
-      'Avoid stage directions; convey emotion by word choice only.',
-      'If the user asks questions unrelated to the murder, the case, or the scenario (such as recipes, trivia, or personal requests), respond in-character and gently steer the conversation back to the investigation. Express that now is not the time for unrelated topics.',
-      `Shared scenario: ${shared}`,
-      'Context (JSON, safe):',
-      JSON.stringify({
-        setting: sc.setting,
-        victim: sc.victim,
-        suspect: safeSuspect,
-        weapons: safeWeapons,
-        weaponsLinkedToYou: weaponsLinked,
-        verifiers: verifiers.map((v: any) => ({ id: v.id, name: v.name, gender: v.gender, age: v.age, alibi: v.alibi })),
-        relationships: sc.relationships,
-        witnessedEvents: sc.witnessedEvents,
-        sharedStory: sc.sharedStory,
-      }),
-      'Answer as your character. Do not break character.',
-    ].join('\n');
-  };
+  // buildSystem moved to util
 
   function renderGamePage() {
     return (
@@ -409,7 +329,7 @@ function App() {
                               thinking={thinking}
                               messages={messages}
                               onSend={send}
-                              colorize={colorize}
+                              colorize={(t: string) => colorizeText({ text: t, weaponKeywordMap, suspectNameToColor, suspectTokenToColor })}
                             />
                           </div>
                         )}
@@ -440,7 +360,7 @@ function App() {
                             <span>[{c.type}] </span>
                             <span style={{ color: suspectNameToColor[c.subject] || '#dc2626', fontWeight: 600 }}>{c.subject}</span>
                             <span>: </span>
-                            <span dangerouslySetInnerHTML={{ __html: colorize(c.note) }} />
+                            <span dangerouslySetInnerHTML={{ __html: colorizeText({ text: c.note, weaponKeywordMap, suspectNameToColor, suspectTokenToColor }) }} />
                           </li>
                         ))}
                       </ul>

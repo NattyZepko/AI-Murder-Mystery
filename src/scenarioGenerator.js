@@ -1,48 +1,9 @@
 // Scenario generation logic via Ollama
 const { chatWithAI } = require('./ai');
 const { logScenario, logEvent } = require('./logger');
-const fs = require('fs');
-const path = require('path');
+const { getRecentSettings, sanitizeWeaponName, fisherYates, pickFew } = require('./scenarioGenerator.helpers');
 
-function getRecentSettings(maxFiles = 8) {
-    try {
-        const logDir = path.resolve(__dirname, '..', 'logs');
-        if (!fs.existsSync(logDir)) return [];
-        const files = fs.readdirSync(logDir)
-            .filter(f => /session-.*\.log$/i.test(f))
-            .map(f => ({ f, p: path.join(logDir, f) }))
-            .map(fp => ({
-                path: fp.p,
-                mtime: (() => { try { return fs.statSync(fp.p).mtimeMs || 0; } catch (_) { return 0; } })()
-            }))
-            .sort((a, b) => b.mtime - a.mtime)
-            .slice(0, Math.max(0, maxFiles));
-        const out = [];
-        for (const file of files) {
-            try {
-                const content = fs.readFileSync(file.path, 'utf8');
-                const idx = content.lastIndexOf('SCENARIO_JSON:');
-                if (idx >= 0) {
-                    const line = content.slice(idx).split('\n', 1)[0];
-                    const jsonStr = line.replace(/^.*SCENARIO_JSON:\s*/, '');
-                    try {
-                        const obj = JSON.parse(jsonStr);
-                        const s = String(obj?.setting || '').trim();
-                        if (s) out.push(s);
-                    } catch (_) { /* ignore parse error */ }
-                }
-            } catch (_) { /* ignore file read error */ }
-        }
-        // Return unique recent settings (case-insensitive uniqueness)
-        const seen = new Set();
-        const uniq = [];
-        for (const s of out) {
-            const key = s.toLowerCase();
-            if (!seen.has(key)) { seen.add(key); uniq.push(s); }
-        }
-        return uniq;
-    } catch (_) { return []; }
-}
+// getRecentSettings moved to helpers
 
 async function generateScenario() {
                 const system = `You are a scenario generator for a text-only murder mystery game.
@@ -312,28 +273,7 @@ Ensure each suspect has a gender and age. Make personalities bold and distinct, 
             }
         });
         // Fallback: sanitize weapon names to remove stopwords/prepositions (e.g., "from", "of", "with").
-        const STOP_WORDS = new Set([
-            'and','with','of','a','an','the','or','in','on','at','to','for','by','from','into','over','under','above','below','near','through','off','up','down','out','about','as'
-        ]);
-        const titleCase = (s) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
-        const sanitizeWeaponName = (name) => {
-            if (!name || typeof name !== 'string') return 'Weapon';
-            // Drop parenthetical codes like (K-15)
-            let base = name.replace(/\([^)]*\)/g, ' ');
-            // Split on non-alphanumerics, filter stopwords and empties
-            let tokens = base
-                .split(/[^A-Za-z0-9]+/)
-                .map(t => t.trim())
-                .filter(Boolean)
-                .filter(t => !STOP_WORDS.has(t.toLowerCase()));
-            // Keep it concise (max 3 significant tokens)
-            if (tokens.length > 3) tokens = tokens.slice(0, 3);
-            const cleaned = tokens.map(titleCase).join(' ').trim();
-            return cleaned || 'Weapon';
-        };
-        (scenario.weapons || []).forEach(w => {
-            try { w.name = sanitizeWeaponName(String(w.name || '')); } catch (_) {}
-        });
+        (scenario.weapons || []).forEach(w => { try { w.name = sanitizeWeaponName(String(w.name || '')); } catch (_) {} });
 
         // Enrich: some suspects know about weapons not on/near them (adds investigative misdirection & context)
         try {
@@ -393,15 +333,8 @@ Ensure each suspect has a gender and age. Make personalities bold and distinct, 
         } catch (_) {}
 
         // Shuffle suspects (and weapons) to avoid consistent ordering patterns like guilty always first
-        const fisherYates = (arr) => {
-            for (let i = arr.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [arr[i], arr[j]] = [arr[j], arr[i]];
-            }
-            return arr;
-        };
-        if (Array.isArray(scenario.suspects)) fisherYates(scenario.suspects);
-        if (Array.isArray(scenario.weapons)) fisherYates(scenario.weapons);
+    if (Array.isArray(scenario.suspects)) fisherYates(scenario.suspects);
+    if (Array.isArray(scenario.weapons)) fisherYates(scenario.weapons);
     } catch (_) {}
     try { logScenario(scenario); } catch (_) {}
     return scenario;
