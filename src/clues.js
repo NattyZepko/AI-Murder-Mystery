@@ -1,13 +1,28 @@
 const { chatWithAI } = require('./ai');
+const fs = require('fs');
+const path = require('path');
+
+function loadAiTemplate(language = 'English') {
+  try {
+    const name = String(language || 'English');
+    const file = path.resolve(__dirname, 'locales', 'ai', `${name}.json`);
+    if (fs.existsSync(file)) {
+      const txt = fs.readFileSync(file, 'utf8');
+      return JSON.parse(txt);
+    }
+  } catch (_) {}
+  return null;
+}
 
 // Ask AI to summarize only meaningful clues; returns [{ type, note }]
 async function extractMeaningfulClues({ reply, lastUserText, suspect, scenario, language }) {
   try {
     const weaponsList = (scenario.weapons || []).map(w => w.name).join(', ');
     const suspectsList = (scenario.suspects || []).map(s => s.name).join(', ');
-    const langInstr = language && String(language).toLowerCase() !== 'english'
+    const tpl = loadAiTemplate(language) || {};
+    const langInstr = tpl.clues_system_prefix || (language && String(language).toLowerCase() !== 'english'
       ? `Return extracted clues and their notes in ${language}.`
-      : `Return extracted clues and their notes in English.`;
+      : `Return extracted clues and their notes in English.`);
     const system = `You are an expert detective's note-taker. ${langInstr} Extract ONLY meaningful, case-advancing clues (facts) from the suspect's latest reply.
 Return STRICT JSON:
 { "clues": Array<{ type: "time"|"alibi"|"witness"|"weapon"|"contradiction"|"motive"|"location"|"admission"|"knowledge", note: string, strength: "low"|"medium"|"high" }> }

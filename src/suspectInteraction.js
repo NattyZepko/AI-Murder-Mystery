@@ -2,6 +2,20 @@ const readline = require('readline');
 const { extractMeaningfulClues } = require('./clues');
 const { COLOR } = require('./ui');
 const { KEYS, TEXT } = require('./constants');
+const fs = require('fs');
+const path = require('path');
+
+function loadAiTemplate(language = 'English') {
+  try {
+    const name = String(language || 'English');
+    const file = path.resolve(__dirname, 'locales', 'ai', `${name}.json`);
+    if (fs.existsSync(file)) {
+      const txt = fs.readFileSync(file, 'utf8');
+      return JSON.parse(txt);
+    }
+  } catch (_) {}
+  return null;
+}
 
 function createSuspectInteractor({ rl, scenario, lockInput, unlockInput, discoveredClues, mentionedWeapons, logUser, logAI, chatWithAI, language } = {}) {
   return function interactWithSuspect(suspect) {
@@ -51,9 +65,10 @@ function createSuspectInteractor({ rl, scenario, lockInput, unlockInput, discove
   const seenEvents = witnessedEvents
     .filter(w => Array.isArray(w?.witnesses) && w.witnesses.includes(suspect.id))
     .map(w => `${w.time ? w.time + ' - ' : ''}${w.description}`);
-    const langInstr = language && String(language).toLowerCase() !== 'english'
+    const tpl = loadAiTemplate(language) || {};
+    const langInstr = tpl.suspect_system_prefix || (language && String(language).toLowerCase() !== 'english'
       ? `Produce all responses in ${language}. Return names and descriptions in ${language}.`
-      : `Produce all responses in English.`;
+      : `Produce all responses in English.`);
     const system = `${langInstr}\nYou are roleplaying as the suspect in a murder mystery.
 Persona: ${suspect.persona || ''}
 Name: ${suspect.name}

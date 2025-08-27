@@ -5,11 +5,27 @@ const { getRecentSettings, sanitizeWeaponName, fisherYates, pickFew } = require(
 
 // getRecentSettings moved to helpers
 
+const fs = require('fs');
+const path = require('path');
+
+function loadAiTemplate(language = 'English') {
+    try {
+        const name = String(language || 'English');
+        const file = path.resolve(__dirname, 'locales', 'ai', `${name}.json`);
+        if (fs.existsSync(file)) {
+            const txt = fs.readFileSync(file, 'utf8');
+            return JSON.parse(txt);
+        }
+    } catch (_) {}
+    return null;
+}
+
 async function generateScenario(opts = {}) {
                 const { language = 'English' } = opts || {};
-                const langInstr = language && String(language).toLowerCase() !== 'english'
+                const tpl = loadAiTemplate(language) || {};
+                const langInstr = tpl.scenario_system_prefix || (language && String(language).toLowerCase() !== 'english'
                     ? `Produce all output (names, weapons, descriptions, and JSON fields) in ${language}. Do not include translations or English fallbacks.`
-                    : `Produce all output in English.`;
+                    : `Produce all output in English.`);
                 const system = `You are a scenario generator for a text-only murder mystery game.
 ${langInstr}
 Return STRICT JSON conforming to this TypeScript type, no commentary:
@@ -75,13 +91,14 @@ Ensure each suspect has a gender and age. Make personalities bold and distinct, 
             { role: 'user', content: user }
         ],
         // Encourage short outputs and faster sampling
-    options: { temperature: 0.92, top_p: 0.95, max_tokens: 1200, response_mime_type: 'application/json' }
+    options: { temperature: 0.92, top_p: 0.95, max_tokens: 1800, response_mime_type: 'application/json' }
     });
 
     let scenario;
+    let content = '';
     try {
         // ollama.chat returns { message: { role, content }, ... }
-                let content = res.message?.content ?? '';
+                content = res.message?.content ?? '';
                 content = String(content).trim();
                 // Strip code fences if present
                 if (/^```/.test(content)) {
@@ -113,11 +130,35 @@ Ensure each suspect has a gender and age. Make personalities bold and distinct, 
                                     scenario = JSON.parse(fixed);
                                 }
             } else {
+                // Re-throw original parsing error so we can include the raw content below
                 throw _inner;
             }
         }
     } catch (e) {
-        throw new Error('AI did not return valid JSON scenario. ' + e.message +"\nreturned: " + scenario);
+        // Attempt a single automated repair: ask the model to convert its previous reply into STRICT JSON only.
+        try {
+            const repairSystem = `You are a helpful JSON fixer. The user needs ONLY valid JSON that matches the previously given scenario schema. Do NOT add any explanation, headings, markdown, or code fences. Output ONLY the JSON object. Keys must remain in English; translate all textual VALUES into ${language}.`;
+            const repairUser = `Here is the assistant's previous reply that failed to parse as JSON:\n---\n${String(content).slice(0,4000)}\n---\nPlease output only the corrected JSON object now.`;
+            const repairRes = await chatWithAI({ system: repairSystem, messages: [{ role: 'user', content: repairUser }], options: { temperature: 0.0, top_p: 1.0, max_tokens: 2000, response_mime_type: 'application/json' } });
+            let repaired = String(repairRes.message?.content || '').trim();
+            if (/^```/.test(repaired)) {
+                const firstNl = repaired.indexOf('\n');
+                if (firstNl !== -1) repaired = repaired.slice(firstNl + 1);
+                if (repaired.endsWith('```')) repaired = repaired.slice(0, -3);
+                repaired = repaired.trim();
+            }
+            try {
+                scenario = JSON.parse(repaired);
+            } catch (_r2) {
+                // If repair failed, include both original raw and repaired content in the error
+                const raw = (typeof content !== 'undefined') ? String(content).slice(0, 2000) : '<no content captured>';
+                const repTrunc = String(repaired || '<no repaired content>').slice(0, 2000);
+                throw new Error('AI did not return valid JSON scenario after repair. Original parse error: ' + (e && e.message ? e.message : String(e)) + "\nRaw AI content (truncated):\n" + raw + "\nRepaired attempt (truncated):\n" + repTrunc);
+            }
+        } catch (repairErr) {
+            // Surface repair error if it occurred
+            throw new Error('AI did not return valid JSON scenario. ' + (e && e.message ? e.message : String(e)) + '\nRepair attempt failed: ' + (repairErr && repairErr.message ? repairErr.message : String(repairErr)));
+        }
     }
 
     // Minimal validation

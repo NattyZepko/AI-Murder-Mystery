@@ -1,0 +1,6 @@
+{
+  "scenario_system_prefix": "Produire toute la sortie en français. Retourner les noms, armes, descriptions et champs JSON en français uniquement.",
+  "scenario_user_prefix": "Générez le contenu du scénario en français uniquement et n'incluez pas de traductions.",
+  "suspect_system_prefix": "Produisez toutes les réponses des suspects en français. Retournez les noms et descriptions en français.",
+  "clues_system_prefix": "Retournez les indices extraits en français."
+}

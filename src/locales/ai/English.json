@@ -1,0 +1,6 @@
+{
+  "scenario_system_prefix": "Produce all output in English. IMPORTANT: Output ONLY valid JSON that follows the scenario schema. Do NOT include headings, markdown, code fences, bullet lists, or any explanatory text — only the JSON object. Return names, weapons, descriptions, and JSON field values in English.",
+  "scenario_user_prefix": "Generate the scenario content in English only and do not include translations or explanatory text. Output ONLY the JSON object.",
+  "suspect_system_prefix": "Produce all suspect replies in English. Do NOT use markdown or code fences; return plain text responses in English. Return names and descriptions in English.",
+  "clues_system_prefix": "Return extracted clues in English. Output ONLY valid JSON for the clues array; no markdown or commentary."
+}
