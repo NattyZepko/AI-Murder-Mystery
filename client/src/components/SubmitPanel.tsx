@@ -1,7 +1,8 @@
 import React from 'react'
-import en from '../i18n/English.json'
+import { useLocale } from '../i18n/LocaleProvider'
 
 export function SubmitPanel({ scenario, mentionedWeapons, onSolved }: { scenario: any, mentionedWeapons: Set<string>, onSolved?: () => void }) {
+  const en = useLocale()
   const [selectedSuspectIndex, setSelectedSuspectIndex] = React.useState<number>(-1)
   const [selectedWeaponIndex, setSelectedWeaponIndex] = React.useState<number>(-1)
   const [result, setResult] = React.useState<string>('')
@@ -33,6 +34,7 @@ export function SubmitPanel({ scenario, mentionedWeapons, onSolved }: { scenario
   }
 
   const submit = () => {
+  const en = useLocale()
     if (cooldown > 0) return
   if (selectedSuspectIndex < 0) { setResult(en.submit.pickSuspect); return }
   if (revealedWeapons.length === 0) { setResult(en.submit.notEnoughEvidence); return }

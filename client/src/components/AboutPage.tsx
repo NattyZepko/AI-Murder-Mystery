@@ -1,7 +1,8 @@
 import React from 'react';
-import en from '../i18n/English.json';
+import { useLocale } from '../i18n/LocaleProvider';
 
 export function AboutPage() {
+  const en = useLocale();
   return (
     <div style={{ padding: 32 }}>
       <h2>{en.about.title}</h2>

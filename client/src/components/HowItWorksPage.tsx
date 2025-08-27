@@ -1,7 +1,8 @@
 import React from 'react';
-import en from '../i18n/English.json';
+import { useLocale } from '../i18n/LocaleProvider';
 
 export function HowItWorksPage() {
+  const en = useLocale();
   return (
     <div style={{ padding: 32, maxWidth: 800, margin: '0 auto', background: 'rgba(30,41,59,0.95)', color: '#e5e7eb', borderRadius: 12, boxShadow: '0 4px 24px #0004' }}>
       <h2 style={{ fontSize: 32, marginBottom: 16 }}>{en.how.title}</h2>

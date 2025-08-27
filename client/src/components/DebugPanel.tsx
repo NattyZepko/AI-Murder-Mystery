@@ -1,7 +1,8 @@
 import React from 'react'
-import en from '../i18n/English.json'
+import { useLocale } from '../i18n/LocaleProvider'
 
 export function DebugPanel({ scenario }: { scenario: any }) {
+  const en = useLocale()
   const [suspectSort, setSuspectSort] = React.useState<{ key: string, dir: 'asc' | 'desc' }>({ key: 'name', dir: 'asc' })
   const [weaponSort, setWeaponSort] = React.useState<{ key: string, dir: 'asc' | 'desc' }>({ key: 'name', dir: 'asc' })
   const [relSort, setRelSort] = React.useState<{ key: string, dir: 'asc' | 'desc' }>({ key: 'between', dir: 'asc' })
@@ -110,13 +111,17 @@ export function DebugPanel({ scenario }: { scenario: any }) {
         <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #ccc' }}>
           <thead>
             <tr>
-              {en.debug.weaponColumns.map((h: string) => (
-                <th key={h} onClick={() => setWeaponSort(prev => ({ key: h === 'foundOn' ? 'foundOnSuspectId' : h === 'foundNear' ? 'foundNearSuspectId' : h, dir: prev.key === (h === 'foundOn' ? 'foundOnSuspectId' : h === 'foundNear' ? 'foundNearSuspectId' : h) && prev.dir === 'asc' ? 'desc' : 'asc' }))}
-                    style={{ textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #ccc', padding: 6, borderRight: '1px solid #ddd' }}>
-                  {h}
-                  {weaponSort.key === (h === 'foundOn' ? 'foundOnSuspectId' : h === 'foundNear' ? 'foundNearSuspectId' : h) ? (weaponSort.dir === 'asc' ? ' ▲' : ' ▼') : ''}
-                </th>
-              ))}
+              {en.debug.weaponColumns.map((h: any) => {
+                const key = String(h)
+                const sortKey = key === 'foundOn' ? 'foundOnSuspectId' : key === 'foundNear' ? 'foundNearSuspectId' : key
+                return (
+                  <th key={key} onClick={() => setWeaponSort(prev => ({ key: sortKey, dir: prev.key === sortKey && prev.dir === 'asc' ? 'desc' : 'asc' }))}
+                      style={{ textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #ccc', padding: 6, borderRight: '1px solid #ddd' }}>
+                    {String(h)}
+                    {weaponSort.key === sortKey ? (weaponSort.dir === 'asc' ? ' ▲' : ' ▼') : ''}
+                  </th>
+                )
+              })}
             </tr>
           </thead>
           <tbody>
@@ -137,13 +142,17 @@ export function DebugPanel({ scenario }: { scenario: any }) {
           <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #ccc' }}>
             <thead>
               <tr>
-                {en.debug.relColumns.map((h: string) => (
-                  <th key={h} onClick={() => setRelSort(prev => ({ key: h === 'secret' ? 'isSecret' : h, dir: prev.key === (h === 'secret' ? 'isSecret' : h) && prev.dir === 'asc' ? 'desc' : 'asc' }))}
-                      style={{ textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #ccc', padding: 6, borderRight: '1px solid #ddd' }}>
-                    {h}
-                    {relSort.key === (h === 'secret' ? 'isSecret' : h) ? (relSort.dir === 'asc' ? ' ▲' : ' ▼') : ''}
-                  </th>
-                ))}
+                {en.debug.relColumns.map((h: any) => {
+                  const key = String(h)
+                  const sortKey = key === 'secret' ? 'isSecret' : key
+                  return (
+                    <th key={key} onClick={() => setRelSort(prev => ({ key: sortKey, dir: prev.key === sortKey && prev.dir === 'asc' ? 'desc' : 'asc' }))}
+                        style={{ textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #ccc', padding: 6, borderRight: '1px solid #ddd' }}>
+                      {String(h)}
+                      {relSort.key === sortKey ? (relSort.dir === 'asc' ? ' ▲' : ' ▼') : ''}
+                    </th>
+                  )
+                })}
               </tr>
             </thead>
             <tbody>
@@ -165,13 +174,16 @@ export function DebugPanel({ scenario }: { scenario: any }) {
           <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #ccc' }}>
             <thead>
               <tr>
-                {en.debug.eventColumns.map((h: string) => (
-                  <th key={h} onClick={() => setEventSort(prev => ({ key: h, dir: prev.key === h && prev.dir === 'asc' ? 'desc' : 'asc' }))}
-                      style={{ textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #ccc', padding: 6, borderRight: '1px solid #ddd' }}>
-                    {h}
-                    {eventSort.key === h ? (eventSort.dir === 'asc' ? ' ▲' : ' ▼') : ''}
-                  </th>
-                ))}
+                {en.debug.eventColumns.map((h: any) => {
+                  const key = String(h)
+                  return (
+                    <th key={key} onClick={() => setEventSort(prev => ({ key, dir: prev.key === key && prev.dir === 'asc' ? 'desc' : 'asc' }))}
+                        style={{ textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #ccc', padding: 6, borderRight: '1px solid #ddd' }}>
+                      {String(h)}
+                      {eventSort.key === key ? (eventSort.dir === 'asc' ? ' ▲' : ' ▼') : ''}
+                    </th>
+                  )
+                })}
               </tr>
             </thead>
             <tbody>

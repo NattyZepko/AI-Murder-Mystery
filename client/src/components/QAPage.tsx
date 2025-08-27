@@ -1,5 +1,5 @@
 import React from 'react';
-import en from '../i18n/English.json';
+import { useLocale } from '../i18n/LocaleProvider';
 
 type QAItemProps = {
   question: React.ReactNode;
@@ -16,6 +16,7 @@ function QAItem({ question, answer }: QAItemProps) {
 }
 
 export function QAPage() {
+  const en = useLocale();
   return (
     <div style={{ maxWidth: 700, margin: '40px auto', background: 'rgba(30,41,59,0.95)', color: '#e5e7eb', borderRadius: 12, padding: 32, boxShadow: '0 4px 24px #0004' }}>
     <h1 style={{ fontSize: 32, marginBottom: 16 }}>{en.qa.title}</h1>

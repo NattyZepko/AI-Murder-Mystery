@@ -13,7 +13,7 @@ import { DebugPanel } from './components/DebugPanel';
 import { colorizeText } from './utils/colorize';
 import { formatDuration } from './utils/time';
 import { buildSystemForSuspect } from './utils/buildSystem';
-import en from './i18n/English.json';
+import LocaleProvider, { useLocale, useLanguage } from './i18n/LocaleProvider';
 
 // Set the body background to match the app background
 if (typeof document !== 'undefined') {
@@ -22,7 +22,7 @@ if (typeof document !== 'undefined') {
   document.body.style.margin = '0';
 }
 
-function App() {
+function AppInner() {
   // --- HOOKS ---
   const [page, setPage] = React.useState<'game' | 'about' | 'how' | 'qa'>('game');
   const [loading, setLoading] = React.useState(false);
@@ -44,6 +44,9 @@ function App() {
   const MAX_CLUES = 60;
 
   // --- MEMOS & UTILS ---
+  const en = useLocale();
+  const { language } = useLanguage();
+  const isRTL = language === 'Hebrew'
   const suspectNames = React.useMemo(() => new Set((scenario?.suspects ?? []).map((s: any) => s.name).filter(Boolean)), [scenario]);
   const weaponNames = React.useMemo(() => new Set((scenario?.weapons ?? []).map((w: any) => w.name).filter(Boolean)), [scenario]);
   const weaponKeywordMap = React.useMemo(() => {
@@ -262,10 +265,10 @@ function App() {
     return (
       <>
         {startTime && !solved && (
-          <div style={{ position: 'fixed', top: 12, right: 16, background: 'rgba(17,24,39,0.9)', color: '#fff', padding: '6px 10px', borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.2)', zIndex: 1000 }}>
-            ⏱ {formatDuration(elapsedMs)}
-          </div>
-        )}
+              <div style={{ position: 'fixed', top: 12, [isRTL ? 'left' : 'right']: 16, background: 'rgba(17,24,39,0.9)', color: '#fff', padding: '6px 10px', borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.2)', zIndex: 1000 }}>
+                ⏱ {formatDuration(elapsedMs)}
+              </div>
+            )}
   <h1>{en.main.title}</h1>
   <p>{en.main.intro1}</p>
   <p>{en.main.intro2}</p>
@@ -285,7 +288,7 @@ function App() {
               <h2>{scenario.title}</h2>
               <p><strong>Setting:</strong> {scenario.setting}</p>
               {scenario.victim && <p><strong>Victim:</strong> {scenario.victim.name} — <em>{scenario.victim.timeOfDeath}</em></p>}
-              <div style={{ display: 'grid', gridTemplateColumns: '320px minmax(600px, 1fr) 360px', gap: 20, alignItems: 'start', marginTop: 8 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isRTL ? '360px minmax(600px, 1fr) 320px' : '320px minmax(600px, 1fr) 360px', gap: 20, alignItems: 'start', marginTop: 8 }}>
                 <div>
                   <h3>{en.main.suspectsTitle}</h3>
                   <ul>
@@ -341,9 +344,9 @@ function App() {
                     <h3>{en.main.cluesTitle}</h3>
                     <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', margin: '6px 0 8px' }}>
                       {Object.values(en.clues).map((tabLabel) => tabLabel).map((tab) => {
-                        // map returns values like 'all','motive', ... we use the same keys
-                        const key = tab;
-                        const isActive = activeClueTab === tab;
+                        // map returns values like 'all','motive', ... ensure it's a string to satisfy React key typing
+                        const key = String(tab);
+                        const isActive = activeClueTab === key;
                         const count = key === 'all' ? clues.length : clues.filter(c => c.type === key).length;
                         if (key !== 'all' && count === 0) return null;
                         return (
@@ -450,7 +453,7 @@ function App() {
         color: '#f3f4f6',
       }}
     >
-      <TopBar currentPage={page} onNavigate={setPage as any} />
+  <TopBar currentPage={page} onNavigate={setPage as any} />
       {page === 'game' && renderGamePage()}
       {page === 'about' && <AboutPage />}
       {page === 'how' && <HowItWorksPage />}
@@ -458,5 +461,11 @@ function App() {
     </div>
   );
 }
+
+const App = () => (
+  <LocaleProvider>
+    <AppInner />
+  </LocaleProvider>
+)
 
 createRoot(document.getElementById('root')!).render(<App />);
