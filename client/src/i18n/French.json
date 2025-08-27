@@ -5,7 +5,8 @@
     "how": "Comment ça marche",
     "qa": "Q&R",
     "languageTitle": "Langue"
-  },
+  }
+  ,
   "about": {
     "title": "À propos",
     "p1": "Bonjour ! Je suis le créateur de ce jeu de meurtre alimenté par l'IA.",
@@ -90,8 +91,33 @@
     "cluesTitle": "Indices",
     "noClues": "Aucun indice pour le moment.",
     "weaponsMentioned": "Armes mentionnées",
-    "noneYet": "- aucun pour le moment"
+    "noneYet": "- aucun pour le moment",
+    "settingLabel": "Cadre:",
+    "victimLabel": "Victime:",
+    "funnyErrors": [
+      "Les suspects se sont enfuis. On les ramène...",
+      "La victime est en vie. Recherche d'un autre cas...",
+      "Preuves mal étiquetées. Reconstruction de la scène...",
+      "Le détective a renversé du café sur le dossier. Séchage des pages...",
+      "Le témoin refuse de parler sans snacks. Commande de chips...",
+      "L'empreinte digitale est floue. Nouvelle analyse...",
+      "La bande de la scène est emmêlée. Démêlage...",
+      "L'alibi du suspect est Netflix. Vérification des saisons...",
+      "La loupe est manquante. Zoom numérique...",
+      "Le dossier a été fermé par erreur. Réouverture...",
+      "Le chien a mangé le sac de preuves. Promenade...",
+      "Le détective s'est endormi sur la machine à écrire. Retrait des zzz...",
+      "Le GPS recalcule... faites demi-tour...",
+      "Le suspect s'est enfui en voiture de clown. On compte combien sont sortis..."
+    ]
   },
+  "labels": {
+    "gender_male": "homme",
+    "gender_female": "femme",
+    "gender_unknown": "inconnu",
+    "agePrefix": "âge"
+  },
+  
   "clues": {
     "all": "tout",
     "motive": "motif",

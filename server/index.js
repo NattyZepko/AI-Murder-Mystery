@@ -17,7 +17,8 @@ app.get('/api/health', (req, res) => {
 
 app.post('/api/scenario', async (req, res) => {
   try {
-    let scenario = await generateScenario();
+    const { language } = req.body || {};
+    let scenario = await generateScenario({ language });
     scenario = applyScenarioRules(scenario);
     res.json({ scenario });
   } catch (e) {
@@ -37,8 +38,8 @@ app.post('/api/chat', async (req, res) => {
 
 app.post('/api/extract-clues', async (req, res) => {
   try {
-    const { reply, lastUserText, suspect, scenario } = req.body || {};
-    const clues = await extractMeaningfulClues({ reply, lastUserText, suspect, scenario });
+    const { reply, lastUserText, suspect, scenario, language } = req.body || {};
+    const clues = await extractMeaningfulClues({ reply, lastUserText, suspect, scenario, language });
     res.json({ clues });
   } catch (e) {
     res.status(500).json({ error: e.message });

@@ -180,7 +180,7 @@ async function startGame() {
         });
     }
 
-    const interactWithSuspect = createSuspectInteractor({ rl, scenario, lockInput, unlockInput, discoveredClues, mentionedWeapons, logUser, logAI, chatWithAI });
+    const interactWithSuspect = createSuspectInteractor({ rl, scenario, lockInput, unlockInput, discoveredClues, mentionedWeapons, logUser, logAI, chatWithAI, language: 'English' });
 
     function showClues() {
         clearScreen();

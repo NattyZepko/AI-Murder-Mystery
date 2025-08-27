@@ -9,14 +9,18 @@ export function redact(obj: any, keys: string[]) {
   return out;
 }
 
-export function buildSystemForSuspect(suspect: any, sc: any) {
+export function buildSystemForSuspect(suspect: any, sc: any, language?: string) {
   const safeSuspect = redact(suspect, ['isGuilty']);
   const safeWeapons = (sc.weapons ?? []).map((w: any) => redact(w, ['isMurderWeapon']));
   const suspectsById: Record<string, any> = Object.fromEntries((sc.suspects ?? []).map((s: any) => [s.id, s]));
   const verifiers = (suspect.alibiVerifiedBy ?? []).map((id: string) => suspectsById[id]).filter(Boolean);
   const weaponsLinked = (sc.weapons ?? []).filter((w: any) => w.foundOnSuspectId === suspect.id || w.foundNearSuspectId === suspect.id);
   const shared = sc.sharedStory || 'Shared account of the evening; keep your story consistent.';
+  const langInstr = language && String(language).toLowerCase() !== 'english'
+    ? `Produce all responses in ${language}. Return all names, descriptions, and JSON fields in ${language}.`
+    : `Produce all responses in English.`;
   return [
+    langInstr,
     'You are roleplaying as a suspect in a murder mystery.',
     'Stay in character; do not reveal meta info or the culprit.',
     'Avoid stage directions; convey emotion by word choice only.',

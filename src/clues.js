@@ -1,11 +1,14 @@
 const { chatWithAI } = require('./ai');
 
 // Ask AI to summarize only meaningful clues; returns [{ type, note }]
-async function extractMeaningfulClues({ reply, lastUserText, suspect, scenario }) {
+async function extractMeaningfulClues({ reply, lastUserText, suspect, scenario, language }) {
   try {
     const weaponsList = (scenario.weapons || []).map(w => w.name).join(', ');
     const suspectsList = (scenario.suspects || []).map(s => s.name).join(', ');
-    const system = `You are an expert detective's note-taker. Extract ONLY meaningful, case-advancing clues (facts) from the suspect's latest reply.
+    const langInstr = language && String(language).toLowerCase() !== 'english'
+      ? `Return extracted clues and their notes in ${language}.`
+      : `Return extracted clues and their notes in English.`;
+    const system = `You are an expert detective's note-taker. ${langInstr} Extract ONLY meaningful, case-advancing clues (facts) from the suspect's latest reply.
 Return STRICT JSON:
 { "clues": Array<{ type: "time"|"alibi"|"witness"|"weapon"|"contradiction"|"motive"|"location"|"admission"|"knowledge", note: string, strength: "low"|"medium"|"high" }> }
 Rules:
@@ -17,7 +20,7 @@ Context:
 - Weapons: ${weaponsList}
 - Suspects: ${suspectsList}
 - Current suspect: ${suspect.name}`;
-    const content = `User asked: ${lastUserText || ''}\nSuspect replied: ${reply}`;
+  const content = `User asked: ${lastUserText || ''}\nSuspect replied: ${reply}`;
     const res = await chatWithAI({
       system,
       messages: [{ role: 'user', content }],

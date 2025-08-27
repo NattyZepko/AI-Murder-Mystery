@@ -91,6 +91,31 @@
     "noClues": "No clues yet.",
     "weaponsMentioned": "Weapons mentioned",
     "noneYet": "- none yet"
+    ,
+    "settingLabel": "Setting:",
+    "victimLabel": "Victim:",
+    "funnyErrors": [
+      "Suspects ran away. Fetching them back…",
+      "Victim turned out to be alive. Searching another case…",
+      "Evidence mislabeled. Rebuilding the crime scene…",
+      "Detective spilled coffee on the file. Drying pages…",
+      "Witness refuses to talk without snacks. Ordering chips…",
+      "Fingerprint smudged by intern. Restarting analysis…",
+      "Crime scene tape tangled. Untying knots…",
+      "Suspect alibi is Netflix. Cross-checking seasons…",
+      "Magnifying glass missing. Zooming digitally…",
+      "Case closed accidentally. Re-opening investigation…",
+      "Dog ate the evidence bag. Walking the dog…",
+      "Detective fell asleep on the typewriter. Removing zzz’s…",
+      "Crime scene GPS recalculating… please make a U-turn…",
+      "Suspect fled in clown car. Counting how many got out…"
+    ]
+  },
+  "labels": {
+    "gender_male": "male",
+    "gender_female": "female",
+    "gender_unknown": "unknown",
+    "agePrefix": "age"
   },
   "clues": {
     "all": "all",

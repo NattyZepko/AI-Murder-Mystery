@@ -13,6 +13,7 @@ import { DebugPanel } from './components/DebugPanel';
 import { colorizeText } from './utils/colorize';
 import { formatDuration } from './utils/time';
 import { buildSystemForSuspect } from './utils/buildSystem';
+import { tokenize } from './utils/tokenize';
 import LocaleProvider, { useLocale, useLanguage } from './i18n/LocaleProvider';
 
 // Set the body background to match the app background
@@ -56,10 +57,7 @@ function AppInner() {
     (scenario?.weapons ?? []).forEach((w: any) => {
       const name = String(w?.name || '');
       const base = name.replace(/\([^)]*\)/g, ' ');
-      const tokens = base
-        .split(/[^a-zA-Z0-9]+/)
-        .map(t => t.trim())
-        .filter(Boolean)
+      const tokens = tokenize(base, language)
         .filter(t => t.length >= 4 || shortKeep.has(t.toLowerCase()))
         .map(normalize);
       const uniq = Array.from(new Set(tokens));
@@ -92,7 +90,7 @@ function AppInner() {
     const suspects: any[] = Array.isArray(scenario?.suspects) ? scenario.suspects : [];
     suspects.forEach((s: any) => {
       const color = suspectColorById[s.id];
-      const parts = String(s?.name || '').split(/[^a-zA-Z0-9]+/);
+      const parts = tokenize(String(s?.name || ''), language);
       parts.forEach(p => {
         const t = p.trim().toLowerCase();
         if (t && t.length >= 3) tokens.push({ t, color, owner: s.id });
@@ -136,30 +134,14 @@ function AppInner() {
     setError(null);
     setRetryNotice(null);
     setLoading(true);
-    const funnyErrors = [
-      'Suspects ran away. Fetching them back…',
-      'Victim turned out to be alive. Searching another case…',
-      'Evidence mislabeled. Rebuilding the crime scene…',
-      'Detective spilled coffee on the file. Drying pages…',
-      'Witness refuses to talk without snacks. Ordering chips…',
-      'Fingerprint smudged by intern. Restarting analysis…',
-      'Crime scene tape tangled. Untying knots…',
-      'Suspect alibi is Netflix. Cross-checking seasons…',
-      'Magnifying glass missing. Zooming digitally…',
-      'Detective’s pen ran out of ink. Borrowing from judge…',
-      'Case closed accidentally. Re-opening investigation…',
-      'Dog ate the evidence bag. Walking the dog…',
-      'Detective fell asleep on the typewriter. Removing zzz’s…',
-      'Crime scene GPS recalculating… please make a U-turn…',
-      'Suspect fled in clown car. Counting how many got out…',
-    ];
+  const funnyErrors: string[] = Array.isArray((en.main as any)?.funnyErrors) ? (en.main as any).funnyErrors : [];
     let sc: any = null;
     try {
-      sc = await generateScenario();
+      sc = await generateScenario(language);
     } catch (e1: any) {
       setRetryNotice(funnyErrors[Math.floor(Math.random() * funnyErrors.length)]);
       try {
-        sc = await generateScenario();
+        sc = await generateScenario(language);
       } catch (e2: any) {
           setError(e2.message || en.main.generateScenario);
         }
@@ -197,7 +179,7 @@ function AppInner() {
     if (!activeSuspectId || !scenario) return;
     const suspect = (scenario.suspects ?? []).find((s: any) => s.id === activeSuspectId);
     if (!suspect) return;
-  const system = buildSystemForSuspect(suspect, scenario);
+  const system = buildSystemForSuspect(suspect, scenario, language);
     const next: ChatMessage[] = [...messages, { role: 'user' as const, content: text }];
     setMessages(next);
     try {
@@ -216,7 +198,7 @@ function AppInner() {
       });
       setMentionedWeapons(newlyMentioned);
       try {
-        const newClues = await extractClues({ reply, lastUserText: text, suspect, scenario });
+  const newClues = await extractClues({ reply, lastUserText: text, suspect, scenario, language });
         const extracted = Array.isArray(newClues) ? newClues : [];
         // fallback stub for localExtractClues: returns empty array
         const localExtractClues = () => [];
@@ -286,8 +268,8 @@ function AppInner() {
           <>
             <div style={{ marginTop: 16 }}>
               <h2>{scenario.title}</h2>
-              <p><strong>Setting:</strong> {scenario.setting}</p>
-              {scenario.victim && <p><strong>Victim:</strong> {scenario.victim.name} — <em>{scenario.victim.timeOfDeath}</em></p>}
+              <p><strong>{(en.main as any).settingLabel || 'Setting:'}</strong> {scenario.setting}</p>
+              {scenario.victim && <p><strong>{(en.main as any).victimLabel || 'Victim:'}</strong> {scenario.victim.name} — <em>{scenario.victim.timeOfDeath}</em></p>}
               <div style={{ display: 'grid', gridTemplateColumns: isRTL ? '360px minmax(600px, 1fr) 320px' : '320px minmax(600px, 1fr) 360px', gap: 20, alignItems: 'start', marginTop: 8 }}>
                 <div>
                   <h3>{en.main.suspectsTitle}</h3>
@@ -312,7 +294,9 @@ function AppInner() {
                             <div style={{ width: 8, height: 8, borderRadius: '50%', background: suspectColorById[s.id] }} />
                             <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, minWidth: 0, flexWrap: 'wrap' }}>
                               <strong style={{ wordBreak: 'break-word' }}>{s.name}</strong>
-                              <span style={{ color: '#e5e7eb', whiteSpace: 'nowrap', flex: '0 0 auto', fontSize: 12, lineHeight: 1 }}>({s.gender}, {s.age})</span>
+                              <span style={{ color: '#e5e7eb', whiteSpace: 'nowrap', flex: '0 0 auto', fontSize: 12, lineHeight: 1 }}>(
+                                {(en.labels as any)[`gender_${String(s.gender || 'unknown').toLowerCase()}`] || (s.gender || 'unknown')}, {(en.labels as any).agePrefix ? `${(en.labels as any).agePrefix} ${s.age}` : s.age}
+                              )</span>
                             </div>
                           </div>
                           {debug && (

@@ -5,8 +5,13 @@ const { getRecentSettings, sanitizeWeaponName, fisherYates, pickFew } = require(
 
 // getRecentSettings moved to helpers
 
-async function generateScenario() {
+async function generateScenario(opts = {}) {
+                const { language = 'English' } = opts || {};
+                const langInstr = language && String(language).toLowerCase() !== 'english'
+                    ? `Produce all output (names, weapons, descriptions, and JSON fields) in ${language}. Do not include translations or English fallbacks.`
+                    : `Produce all output in English.`;
                 const system = `You are a scenario generator for a text-only murder mystery game.
+${langInstr}
 Return STRICT JSON conforming to this TypeScript type, no commentary:
 {
     "title": string,
@@ -58,6 +63,7 @@ Rules:
         ? `Avoid repeating or closely resembling these recent settings/themes: ${recentSettings.map(s => '"' + s + '"').join(', ')}.`
         : '';
     const user = `Generate a fresh, unique scenario in a surprising, evocative location. Prioritize novelty and diversity across runs.
+${langInstr}
 ${avoidLine}
 Use creative, setting-appropriate weapons. Avoid clichés like wrenches, letter openers, and candlesticks.
 Name each weapon concisely with NO stopwords (no "and", "or", "with", "of", "a", "an", "the", etc.) and no prepositional phrases.

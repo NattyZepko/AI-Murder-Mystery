@@ -1,5 +1,9 @@
-export async function generateScenario() {
-  const res = await fetch('/api/scenario', { method: 'POST' });
+export async function generateScenario(language?: string) {
+  const res = await fetch('/api/scenario', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ language }),
+  });
   const data = await res.json();
   if (!res.ok) throw new Error(data?.error || 'Failed to generate scenario');
   return data.scenario;
@@ -16,7 +20,7 @@ export async function chat(system: string | undefined, messages: Array<{ role: '
   return data;
 }
 
-export async function extractClues(payload: { reply: string, lastUserText: string, suspect: any, scenario: any }) {
+export async function extractClues(payload: { reply: string, lastUserText: string, suspect: any, scenario: any, language?: string }) {
   const res = await fetch('/api/extract-clues', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

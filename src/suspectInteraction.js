@@ -3,7 +3,7 @@ const { extractMeaningfulClues } = require('./clues');
 const { COLOR } = require('./ui');
 const { KEYS, TEXT } = require('./constants');
 
-function createSuspectInteractor({ rl, scenario, lockInput, unlockInput, discoveredClues, mentionedWeapons, logUser, logAI, chatWithAI }) {
+function createSuspectInteractor({ rl, scenario, lockInput, unlockInput, discoveredClues, mentionedWeapons, logUser, logAI, chatWithAI, language } = {}) {
   return function interactWithSuspect(suspect) {
     console.log(TEXT.INTERACTION.INTRO(suspect.name, suspect.gender || 'unknown', suspect.age ?? 'N/A'));
   const weaponsList = (scenario.weapons || []).map(w => w.name).join(', ');
@@ -51,7 +51,10 @@ function createSuspectInteractor({ rl, scenario, lockInput, unlockInput, discove
   const seenEvents = witnessedEvents
     .filter(w => Array.isArray(w?.witnesses) && w.witnesses.includes(suspect.id))
     .map(w => `${w.time ? w.time + ' - ' : ''}${w.description}`);
-  const system = `You are roleplaying as the suspect in a murder mystery.
+    const langInstr = language && String(language).toLowerCase() !== 'english'
+      ? `Produce all responses in ${language}. Return names and descriptions in ${language}.`
+      : `Produce all responses in English.`;
+    const system = `${langInstr}\nYou are roleplaying as the suspect in a murder mystery.
 Persona: ${suspect.persona || ''}
 Name: ${suspect.name}
 Gender: ${suspect.gender || 'unknown'}
@@ -173,7 +176,7 @@ Rules:
           } catch (_) {}
           console.log(`\n${suspect.name}: ${COLOR.green}${reply}${COLOR.reset}\n`);
           try { logAI(suspect.name, reply); } catch (_) {}
-          const aiClues = await extractMeaningfulClues({ reply, lastUserText: text, suspect, scenario });
+            const aiClues = await extractMeaningfulClues({ reply, lastUserText: text, suspect, scenario, language });
           aiClues.forEach(c => {
             if (!discoveredClues.some(d => d.subject === suspect.name && d.note === c.note)) {
               discoveredClues.push({ type: c.type, subject: suspect.name, note: c.note });
