@@ -52,7 +52,10 @@ function startServer(port, attempt = 0) {
     : AI_PROVIDER === 'openai'
       ? `${AI_PROVIDER}:${OPENAI_MODEL}`
       : `ollama:${OLLAMA_MODEL}`;
-  const keyStates = `GOOGLE_API_KEY=${process.env.GOOGLE_API_KEY ? 'set' : 'missing'} OPENAI_API_KEY=${process.env.OPENAI_API_KEY ? 'set' : 'missing'}`;
+  const googleKeyStatus = `GOOGLE_API_KEY=${process.env.GOOGLE_API_KEY ? 'set' : 'missing'}`;
+  const gptKeyStatus = `OPENAI_API_KEY=${process.env.OPENAI_API_KEY ? 'set' : 'missing'}`;
+  const ollamaKeyStatus = `OLLAMA_API_KEY=${process.env.OLLAMA_API_KEY ? 'set' : 'missing'}`;
+  const keyStates = `${googleKeyStatus} \n ${gptKeyStatus} \n ${ollamaKeyStatus} \n`;
   const server = app.listen(port, () => {
     console.log(`Server listening on http://localhost:${port}`);
     console.log(`[AI] Provider: ${providerInfo} (${keyStates})`);
