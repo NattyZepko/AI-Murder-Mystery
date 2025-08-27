@@ -105,18 +105,39 @@ function App() {
   const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const colorize = (text: string) => {
     let out = text;
-    const weaponTokens: string[] = Array.from(new Set(Object.values(weaponKeywordMap).flat()));
+  // Helper for thinner white outline
+  const outline = 'text-shadow: -0.5px -0.5px 0 #000000ff, 0.5px -0.5px 0 #000000ff, -0.5px 0.5px 0 #000000ff, 0.5px 0.5px 0 #000000ff;';
+    // Color full weapon names (case-insensitive, always yellow)
+    const weaponNames = Object.keys(weaponKeywordMap);
+    if (weaponNames.length) {
+      const pattern = new RegExp(`\\b(${weaponNames.map(escapeRe).sort((a,b)=>b.length-a.length).join('|')})\\b`, 'gi');
+      out = out.replace(pattern, (m) => `<span style="color:#b58900;${outline}">${m}</span>`);
+    }
+    // Color weapon tokens (case-insensitive, always yellow)
+    const weaponTokens = Array.from(new Set(Object.values(weaponKeywordMap).flat()));
     if (weaponTokens.length) {
       const pattern = new RegExp(`\\b(${weaponTokens.map(escapeRe).sort((a,b)=>b.length-a.length).join('|')})\\b`, 'gi');
-      out = out.replace(pattern, (m) => `<span style=\\"color:#b58900\\">${m}</span>`);
+      out = out.replace(pattern, (m) => `<span style="color:#b58900;${outline}">${m}</span>`);
     }
-    const suspectTokens: string[] = Object.keys(suspectTokenToColor);
+    // Color full suspect names (case-insensitive, use correct color)
+    const suspectNames = Object.keys(suspectNameToColor);
+    if (suspectNames.length) {
+      const pattern = new RegExp(`\\b(${suspectNames.map(escapeRe).sort((a,b)=>b.length-a.length).join('|')})\\b`, 'gi');
+      out = out.replace(pattern, (m) => {
+        // Find the actual name in suspectNames that matches (case-insensitive)
+        const matchName = suspectNames.find(n => n.toLowerCase() === m.toLowerCase());
+        const color = matchName ? suspectNameToColor[matchName] : '#dc2626';
+        return `<span style="color:${color};${outline}">${m}</span>`;
+      });
+    }
+    // Color suspect tokens (case-insensitive, use correct color)
+    const suspectTokens = Object.keys(suspectTokenToColor);
     if (suspectTokens.length) {
       const pattern = new RegExp(`\\b(${suspectTokens.map(escapeRe).sort((a,b)=>b.length-a.length).join('|')})\\b`, 'gi');
       out = out.replace(pattern, (m) => {
         const key = m.toLowerCase();
         const color = suspectTokenToColor[key] || '#dc2626';
-        return `<span style=\\"color:${color}\\">${m}</span>`;
+        return `<span style="color:${color};${outline}">${m}</span>`;
       });
     }
     return out;
@@ -298,6 +319,7 @@ function App() {
       'You are roleplaying as a suspect in a murder mystery.',
       'Stay in character; do not reveal meta info or the culprit.',
       'Avoid stage directions; convey emotion by word choice only.',
+      'If the user asks questions unrelated to the murder, the case, or the scenario (such as recipes, trivia, or personal requests), respond in-character and gently steer the conversation back to the investigation. Express that now is not the time for unrelated topics.',
       `Shared scenario: ${shared}`,
       'Context (JSON, safe):',
       JSON.stringify({
@@ -325,7 +347,7 @@ function App() {
         )}
         <h1>Murder Mystery</h1>
         <p>Generate a scenario and inspect suspects, relationships, and witnessed events. (It might take a minute)</p>
-        <p>Be warned! Refreshing, closing, or moving to another page will reset the entire game!</p>
+        <p>Be warned! Refreshing, closing, or moving to another page will reset the entire game! (but you can move tabs within this site)</p>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
           {(!scenario || solved) && (
             <button disabled={loading} onClick={generate}>{loading ? 'Generating…' : (solved ? 'Generate New Mystery' : 'Generate Scenario')}</button>
