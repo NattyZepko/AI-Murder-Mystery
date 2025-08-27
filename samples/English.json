@@ -1,0 +1,353 @@
+{
+  "title": "Midnight in the Museum",
+  "setting": "Dusty, dimly lit museum at night",
+  "victim": {
+    "name": "Professor Armitage",
+    "timeOfDeath": "00:15",
+    "location": "Egyptian exhibit"
+  },
+  "suspects": [
+    {
+      "id": "suspect5",
+      "name": "Javier Rodriguez",
+      "gender": "male",
+      "age": 30,
+      "mannerisms": [
+        "restless and anxious"
+      ],
+      "quirks": [
+        "Tends to shout in anger"
+      ],
+      "catchphrase": "Oh no no no no no!",
+      "backstory": "Delivery driver.",
+      "relationshipToVictim": "unknown",
+      "motive": "opportunistic theft",
+      "alibi": "making deliveries",
+      "alibiVerifiedBy": [
+        "suspect4"
+      ],
+      "knowledge": [
+        "museum access points"
+      ],
+      "contradictions": [],
+      "isGuilty": false,
+      "persona": "nervous"
+    },
+    {
+      "id": "suspect2",
+      "name": "Dr. Alistair Finch",
+      "gender": "male",
+      "age": 52,
+      "mannerisms": [
+        "calm demeanor"
+      ],
+      "quirks": [
+        "clears throat often"
+      ],
+      "catchphrase": "Fascinating!",
+      "backstory": "Professor Armitage's rival.",
+      "relationshipToVictim": "colleague",
+      "motive": "professional rivalry",
+      "alibi": "at home",
+      "alibiVerifiedBy": [
+        "suspect3",
+        "suspect1"
+      ],
+      "knowledge": [
+        "victim's research"
+      ],
+      "contradictions": [],
+      "isGuilty": false,
+      "persona": "pompous"
+    },
+    {
+      "id": "suspect3",
+      "name": "Silas Bellweather",
+      "gender": "male",
+      "age": 28,
+      "mannerisms": [
+        "nervous fidgeting"
+      ],
+      "quirks": [
+        "bites nails"
+      ],
+      "catchphrase": "Uh... yeah...",
+      "backstory": "Night watchman.",
+      "relationshipToVictim": "acquaintance",
+      "motive": "robbery",
+      "alibi": "on duty",
+      "alibiVerifiedBy": [],
+      "knowledge": [
+        "museum layout"
+      ],
+      "contradictions": [
+        "time discrepancies"
+      ],
+      "isGuilty": true,
+      "persona": "shifty"
+    },
+    {
+      "id": "suspect1",
+      "name": "Liora Dayan",
+      "gender": "female",
+      "age": 34,
+      "mannerisms": [
+        "speaks quickly"
+      ],
+      "quirks": [
+        "plays with ring"
+      ],
+      "catchphrase": "Honestly!",
+      "backstory": "Research assistant.",
+      "relationshipToVictim": "colleague",
+      "motive": "jealousy",
+      "alibi": "in lab",
+      "alibiVerifiedBy": [
+        "suspect2"
+      ],
+      "knowledge": [
+        "saw victim with another"
+      ],
+      "contradictions": [],
+      "isGuilty": false,
+      "persona": "tense"
+    },
+    {
+      "id": "suspect6",
+      "name": "Esmeralda Jones",
+      "gender": "female",
+      "age": 25,
+      "mannerisms": [
+        "giggles frequently"
+      ],
+      "quirks": [
+        "plays with hair"
+      ],
+      "catchphrase": "Oh my gosh!",
+      "backstory": "Volunteer docent.",
+      "relationshipToVictim": "acquaintance",
+      "motive": "unknown",
+      "alibi": "at home",
+      "alibiVerifiedBy": [],
+      "knowledge": [
+        "victim's schedule"
+      ],
+      "contradictions": [],
+      "isGuilty": false,
+      "persona": "ditzy"
+    },
+    {
+      "id": "suspect4",
+      "name": "Beatrice Martel",
+      "gender": "female",
+      "age": 45,
+      "mannerisms": [
+        "calm demeanor"
+      ],
+      "quirks": [
+        "precise movements"
+      ],
+      "catchphrase": "Everything in its place.",
+      "backstory": "Museum curator.",
+      "relationshipToVictim": "superior",
+      "motive": "unknown",
+      "alibi": "in office",
+      "alibiVerifiedBy": [
+        "suspect5"
+      ],
+      "knowledge": [
+        "museum security"
+      ],
+      "contradictions": [],
+      "isGuilty": false,
+      "persona": "reserved"
+    }
+  ],
+  "weapons": [
+    {
+      "id": "weapon4",
+      "name": "Broken Sculpture",
+      "discoveredHints": [
+        "sharp edges",
+        "victim's clothing fibers"
+      ],
+      "isMurderWeapon": false,
+      "foundOnSuspectId": null,
+      "foundNearSuspectId": "suspect2"
+    },
+    {
+      "id": "weapon2",
+      "name": "Antique Vase",
+      "discoveredHints": [
+        "shattered fragments",
+        "suspect's fingerprints"
+      ],
+      "isMurderWeapon": false,
+      "foundOnSuspectId": null,
+      "foundNearSuspectId": "suspect1"
+    },
+    {
+      "id": "weapon5",
+      "name": "Revolver",
+      "discoveredHints": [
+        "gunpowder residue",
+        "witness testimony"
+      ],
+      "isMurderWeapon": false,
+      "foundOnSuspectId": null,
+      "foundNearSuspectId": "suspect5"
+    },
+    {
+      "id": "weapon3",
+      "name": "Silver Letter Opener",
+      "discoveredHints": [
+        "victim's blood",
+        "museum inventory"
+      ],
+      "isMurderWeapon": true,
+      "foundOnSuspectId": "suspect3",
+      "foundNearSuspectId": null
+    },
+    {
+      "id": "weapon1",
+      "name": "Lead Pipe",
+      "discoveredHints": [
+        "victim's DNA",
+        "nearby footprints"
+      ],
+      "isMurderWeapon": false,
+      "foundOnSuspectId": null,
+      "foundNearSuspectId": "suspect3"
+    }
+  ],
+  "timeline": [
+    {
+      "time": "22:00",
+      "summary": "Professor Armitage was seen entering the Egyptian exhibit.",
+      "involvedSuspects": [
+        "suspect1",
+        "suspect2"
+      ]
+    },
+    {
+      "time": "22:30",
+      "summary": "Silas Bellweather started his night watch.",
+      "involvedSuspects": [
+        "suspect3"
+      ]
+    },
+    {
+      "time": "23:00",
+      "summary": "A loud crash was heard near the Egyptian exhibit.",
+      "involvedSuspects": [
+        "suspect3",
+        "suspect4"
+      ]
+    },
+    {
+      "time": "23:30",
+      "summary": "Silas Bellweather's alibi is contradicted by security footage.",
+      "involvedSuspects": [
+        "suspect3",
+        "suspect4"
+      ]
+    },
+    {
+      "time": "00:00",
+      "summary": "Beatrice Martel made her final rounds.",
+      "involvedSuspects": [
+        "suspect4"
+      ]
+    },
+    {
+      "time": "00:15",
+      "summary": "Professor Armitage was found dead.",
+      "involvedSuspects": [
+        "suspect3"
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "between": [
+        "suspect1",
+        "suspect2"
+      ],
+      "type": "friends",
+      "isSecret": false
+    },
+    {
+      "between": [
+        "suspect2",
+        "suspect3"
+      ],
+      "type": "family",
+      "isSecret": true,
+      "note": "Mother and son"
+    },
+    {
+      "between": [
+        "suspect4",
+        "suspect5"
+      ],
+      "type": "colleagues",
+      "isSecret": false
+    },
+    {
+      "between": [
+        "suspect5",
+        "suspect6"
+      ],
+      "type": "rivals",
+      "isSecret": false
+    }
+  ],
+  "witnessedEvents": [
+    {
+      "description": "Professor Armitage was seen entering the Egyptian exhibit.",
+      "witnesses": [
+        "suspect1",
+        "suspect2"
+      ],
+      "involves": [
+        "suspect1",
+        "suspect2"
+      ]
+    },
+    {
+      "description": "A loud crash was heard near the Egyptian exhibit.",
+      "witnesses": [
+        "suspect4"
+      ],
+      "involves": [
+        "suspect3"
+      ]
+    },
+    {
+      "description": "Silas Bellweather's alibi is contradicted by security footage.",
+      "witnesses": [
+        "suspect4"
+      ],
+      "involves": [
+        "suspect3"
+      ]
+    },
+    {
+      "description": "Professor Armitage was found dead.",
+      "witnesses": [
+        "suspect3"
+      ],
+      "involves": [
+        "suspect3"
+      ]
+    }
+  ],
+  "truth": {
+    "guiltySuspectId": "suspect3",
+    "murderWeaponId": "weapon3",
+    "motiveCore": "robbery",
+    "keyContradictions": [
+      "time discrepancies"
+    ]
+  }
+}

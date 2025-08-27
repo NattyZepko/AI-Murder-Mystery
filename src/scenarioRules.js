@@ -77,33 +77,74 @@ function enforceAlibis(scenario, suspectsById) {
   for (const s of suspects) {
     if (!s || typeof s !== 'object') continue;
     s.alibi = scrubStr(s.alibi, 'Prefers not to say.');
-    s.alibiVerifiedBy = arrayify(s.alibiVerifiedBy).filter(id => !!suspectsById[id]);
+    // Keep only verifiers that are valid suspect IDs (remove external evidence strings)
+    s.alibiVerifiedBy = arrayify(s.alibiVerifiedBy).filter(id => !!suspectsById[id] && id !== s.id);
   }
 
   if (guiltyId && suspectsById[guiltyId]) {
     suspectsById[guiltyId].alibiVerifiedBy = [];
   }
 
+  // Remove any references to the guilty suspect and ensure IDs exist
   for (const s of suspects) {
     if (!s || typeof s !== 'object') continue;
-    s.alibiVerifiedBy = s.alibiVerifiedBy.filter(id => id !== guiltyId && !!suspectsById[id]);
+    s.alibiVerifiedBy = (s.alibiVerifiedBy || []).filter(id => id !== guiltyId && !!suspectsById[id]);
   }
 
-  for (const s of suspects) {
-    if (!s || typeof s !== 'object') continue;
-    if (s.id === guiltyId) continue;
-    for (const vId of s.alibiVerifiedBy) {
+  // Build a list of innocent suspects (excluding guilty)
+  const innocents = suspects.filter(s => s && s.id !== guiltyId);
+
+  // If some innocents already list verifiers, make verification symmetric
+  for (const s of innocents) {
+    for (const vId of s.alibiVerifiedBy || []) {
       const v = suspectsById[vId];
-      if (v && v.id !== guiltyId && !v.alibiVerifiedBy.includes(s.id)) {
+      if (v && v.id !== guiltyId && v.id !== s.id && !Array.isArray(v.alibiVerifiedBy)) v.alibiVerifiedBy = [];
+      if (v && v.id !== guiltyId && v.id !== s.id && !v.alibiVerifiedBy.includes(s.id)) {
         v.alibiVerifiedBy.push(s.id);
       }
     }
   }
 
-  const innocents = suspects.filter(s => s && s.id !== guiltyId);
-  if (!innocents.some(s => (s.alibiVerifiedBy || []).length > 0) && innocents.length >= 2) {
-    innocents[0].alibiVerifiedBy = [innocents[1].id];
-    innocents[1].alibiVerifiedBy = [innocents[0].id];
+  // Ensure there is a network of suspect-to-suspect verification when possible.
+  // Find innocents without any suspect verifiers and group them into mutual pairs or trios.
+  const unverified = innocents.filter(s => !Array.isArray(s.alibiVerifiedBy) || s.alibiVerifiedBy.length === 0);
+  // Shuffle simple using Fisher-Yates style
+  for (let i = unverified.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [unverified[i], unverified[j]] = [unverified[j], unverified[i]];
+  }
+
+  // Create groups of 2 or 3. For a group, each member lists the other(s) as verifiers.
+  let idx = 0;
+  while (idx < unverified.length) {
+    const remaining = unverified.length - idx;
+    if (remaining === 1) {
+      // One leftover: tie to an existing innocent (prefer first non-self)
+      const last = unverified[idx];
+      const partner = innocents.find(s => s.id !== last.id && s.id !== guiltyId) || null;
+      if (partner) {
+        last.alibiVerifiedBy = [partner.id];
+        partner.alibiVerifiedBy = partner.alibiVerifiedBy || [];
+        if (!partner.alibiVerifiedBy.includes(last.id)) partner.alibiVerifiedBy.push(last.id);
+      }
+      break;
+    }
+    // Prefer trios sometimes when possible
+    let groupSize = 2;
+    if (remaining >= 3 && Math.random() < 0.4) groupSize = 3;
+    const group = unverified.slice(idx, idx + groupSize);
+    const ids = group.map(g => g.id).filter(Boolean);
+    for (const member of group) {
+      if (!member || !member.id) continue;
+      member.alibiVerifiedBy = ids.filter(id => id !== member.id);
+    }
+    idx += groupSize;
+  }
+
+  // Final cleanup: remove any verifier refs to guilty or self, and ensure arrays
+  for (const s of suspects) {
+    if (!s || typeof s !== 'object') continue;
+    s.alibiVerifiedBy = Array.isArray(s.alibiVerifiedBy) ? s.alibiVerifiedBy.filter(id => !!suspectsById[id] && id !== s.id && id !== guiltyId) : [];
   }
 }
 
@@ -113,14 +154,14 @@ function buildSharedStory(scenario) {
   const tod = scrubStr(scenario?.victim?.timeOfDeath, 'around 21:00');
   const names = (scenario.suspects || []).map(s => s?.name).filter(Boolean);
   const locationExamples = [
-  'the grand lobby', 'the marina', 'the rooftop bar', 'the spa corridor',
-  'the conference hall', 'the private lounge', 'the service stairwell',
-  'the dimly lit wine cellar', 'the abandoned ballroom', 'the underground parking garage',
-  'the secluded garden', 'the maintenance tunnels', 'the library reading room',
-  'the staff kitchen', 'the penthouse suite', 'the glass atrium',
-  'the art gallery wing', 'the hidden storage room', 'the observation deck',
-  'the back alley entrance', 'the candlelit chapel', 'the VIP theater box',
-];
+    'the grand lobby', 'the marina', 'the rooftop bar', 'the spa corridor',
+    'the conference hall', 'the private lounge', 'the service stairwell',
+    'the dimly lit wine cellar', 'the abandoned ballroom', 'the underground parking garage',
+    'the secluded garden', 'the maintenance tunnels', 'the library reading room',
+    'the staff kitchen', 'the penthouse suite', 'the glass atrium',
+    'the art gallery wing', 'the hidden storage room', 'the observation deck',
+    'the back alley entrance', 'the candlelit chapel', 'the VIP theater box',
+  ];
   const rels = Array.isArray(scenario.relationships) ? scenario.relationships : [];
   const witnesses = Array.isArray(scenario.witnessedEvents) ? scenario.witnessedEvents : [];
   const idToName = id => (scenario.suspects || []).find(s => s.id === id)?.name || id;
@@ -149,7 +190,7 @@ function buildSharedStory(scenario) {
   const lines = [
     `Everyone is attending an event at ${setting}.`,
     `The victim (${victimName}) was last seen alive ${tod}.`,
-     `Unusual noises and raised voices were reported near ${pick(locationExamples)}.`,
+    `Unusual noises and raised voices were reported near ${pick(locationExamples)}.`,
     `You don't know the cause of death, only the time and place, the police won't tell you how the victim died.`,
     `Each of you interacted with the victim or another suspect earlier in the evening.`,
     `Stick to your claimed alibi times and locations; if you verify someone, your stories align.`,
@@ -180,7 +221,7 @@ function applyScenarioRules(inputScenario) {
     if (Array.isArray(scenario.weapons)) {
       scenario.weapons.forEach(w => { if (w && typeof w === 'object') w.isMurderWeapon = Boolean(wid && w.id === wid); });
     }
-  } catch (_) {}
+  } catch (_) { }
   enforceMotives(scenario, suspectsById);
   enforceWeapons(scenario);
   enforceAlibis(scenario, suspectsById);

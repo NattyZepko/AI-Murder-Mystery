@@ -1,0 +1,330 @@
+{
+  "title": "Mort au Casino",
+  "setting": "Un casino luxueux, tard dans la nuit",
+  "victim": {
+    "name": "Isabelle Dufour",
+    "timeOfDeath": "03:00",
+    "location": "Salle de poker"
+  },
+  "suspects": [
+    {
+      "id": "suspect5",
+      "name": "Antoine Lefevre",
+      "gender": "male",
+      "age": 38,
+      "mannerisms": [
+        "fume beaucoup"
+      ],
+      "quirks": [
+        "porte toujours une cravate"
+      ],
+      "catchphrase": "C'est dommage !",
+      "backstory": "Propriétaire du casino.",
+      "relationshipToVictim": "connaissance",
+      "motive": "affaires",
+      "alibi": "dans son bureau",
+      "alibiVerifiedBy": [
+        "suspect6"
+      ],
+      "knowledge": [],
+      "contradictions": [],
+      "isGuilty": false,
+      "persona": "autoritaire"
+    },
+    {
+      "id": "suspect1",
+      "name": "Jean-Pierre Martin",
+      "gender": "male",
+      "age": 45,
+      "mannerisms": [
+        "toussote souvent"
+      ],
+      "quirks": [
+        "ajuste ses lunettes"
+      ],
+      "catchphrase": "C'est impossible !",
+      "backstory": "Joueur professionnel.",
+      "relationshipToVictim": "connaissance",
+      "motive": "dette de jeu",
+      "alibi": "jouait au poker",
+      "alibiVerifiedBy": [
+        "suspect2"
+      ],
+      "knowledge": [],
+      "contradictions": [],
+      "isGuilty": false,
+      "persona": "agité"
+    },
+    {
+      "id": "suspect2",
+      "name": "Annelise Moreau",
+      "gender": "female",
+      "age": 32,
+      "mannerisms": [
+        "se ronge les ongles"
+      ],
+      "quirks": [
+        "porte toujours du rouge"
+      ],
+      "catchphrase": "Je n'y comprends rien !",
+      "backstory": "Serveuse au casino.",
+      "relationshipToVictim": "collègue",
+      "motive": "vengeance",
+      "alibi": "servait des boissons",
+      "alibiVerifiedBy": [
+        "suspect1",
+        "suspect3"
+      ],
+      "knowledge": [],
+      "contradictions": [],
+      "isGuilty": false,
+      "persona": "mystérieuse"
+    },
+    {
+      "id": "suspect3",
+      "name": "Bernard Dupont",
+      "gender": "male",
+      "age": 60,
+      "mannerisms": [
+        "se gratte la tête"
+      ],
+      "quirks": [
+        "collectionne les pièces de monnaie"
+      ],
+      "catchphrase": "C'est incroyable !",
+      "backstory": "Croupier.",
+      "relationshipToVictim": "collègue",
+      "motive": "vol",
+      "alibi": "travaillait",
+      "alibiVerifiedBy": [
+        "suspect2"
+      ],
+      "knowledge": [],
+      "contradictions": [],
+      "isGuilty": false,
+      "persona": "calme"
+    },
+    {
+      "id": "suspect4",
+      "name": "Sophie Bernard",
+      "gender": "female",
+      "age": 27,
+      "mannerisms": [
+        "joue avec ses cheveux"
+      ],
+      "quirks": [
+        "adore les chats"
+      ],
+      "catchphrase": "Sérieusement ?",
+      "backstory": "Cliente régulière.",
+      "relationshipToVictim": "connaissance",
+      "motive": "rivalité amoureuse",
+      "alibi": "était au bar",
+      "alibiVerifiedBy": [],
+      "knowledge": [],
+      "contradictions": [],
+      "isGuilty": true,
+      "persona": "insouciante"
+    },
+    {
+      "id": "suspect6",
+      "name": "Camille Roux",
+      "gender": "female",
+      "age": 24,
+      "mannerisms": [
+        "sourit constamment"
+      ],
+      "quirks": [
+        "adore la musique"
+      ],
+      "catchphrase": "Génial !",
+      "backstory": "Chanteuse.",
+      "relationshipToVictim": "amie",
+      "motive": "héritage",
+      "alibi": "en spectacle",
+      "alibiVerifiedBy": [
+        "suspect5"
+      ],
+      "knowledge": [],
+      "contradictions": [],
+      "isGuilty": false,
+      "persona": "joyeuse"
+    }
+  ],
+  "weapons": [
+    {
+      "id": "weapon1",
+      "name": "Poignard",
+      "discoveredHints": [
+        "traces de sang",
+        "empreintes digitales"
+      ],
+      "isMurderWeapon": false,
+      "foundOnSuspectId": null,
+      "foundNearSuspectId": "suspect1"
+    },
+    {
+      "id": "weapon5",
+      "name": "Pistolet",
+      "discoveredHints": [
+        "balle",
+        "empreintes digitales"
+      ],
+      "isMurderWeapon": false,
+      "foundOnSuspectId": null,
+      "foundNearSuspectId": "suspect5"
+    },
+    {
+      "id": "weapon4",
+      "name": "Coupe De Cristal",
+      "discoveredHints": [
+        "fêlée",
+        "traces de sang"
+      ],
+      "isMurderWeapon": true,
+      "foundOnSuspectId": "suspect4",
+      "foundNearSuspectId": null
+    },
+    {
+      "id": "weapon3",
+      "name": "Bouteille De Champagne",
+      "discoveredHints": [
+        "brisée",
+        "empreintes digitales"
+      ],
+      "isMurderWeapon": false,
+      "foundOnSuspectId": null,
+      "foundNearSuspectId": "suspect2"
+    },
+    {
+      "id": "weapon2",
+      "name": "Couteau De Cuisine",
+      "discoveredHints": [
+        "tache suspecte"
+      ],
+      "isMurderWeapon": false,
+      "foundOnSuspectId": null,
+      "foundNearSuspectId": "suspect3"
+    },
+    {
+      "id": "weapon6",
+      "name": "Fleuret",
+      "discoveredHints": [
+        "traces de sang",
+        "empreintes digitales"
+      ],
+      "isMurderWeapon": false,
+      "foundOnSuspectId": null,
+      "foundNearSuspectId": "suspect6"
+    }
+  ],
+  "timeline": [
+    {
+      "time": "22:45",
+      "summary": "Jean-Pierre Martin et Isabelle Dufour ont été vus en train de discuter animément près de la salle de poker.",
+      "involvedSuspects": [
+        "suspect1"
+      ]
+    },
+    {
+      "time": "23:00",
+      "summary": "Une violente dispute a éclaté entre Isabelle Dufour et un individu non identifié près de la sortie du casino.",
+      "involvedSuspects": []
+    },
+    {
+      "time": "23:30",
+      "summary": "Annelise Moreau a vu Isabelle Dufour quitter le casino seule, semblant contrariée.",
+      "involvedSuspects": [
+        "suspect2"
+      ]
+    },
+    {
+      "time": "00:15",
+      "summary": "Bernard Dupont a déclaré avoir vu une ombre furtive près de la salle de poker.",
+      "involvedSuspects": [
+        "suspect3"
+      ]
+    },
+    {
+      "time": "01:00",
+      "summary": "Sophie Bernard a affirmé avoir croisé Isabelle Dufour au bar du casino.",
+      "involvedSuspects": [
+        "suspect4"
+      ]
+    },
+    {
+      "time": "03:00",
+      "summary": "Isabelle Dufour a été retrouvée morte dans la salle de poker.",
+      "involvedSuspects": []
+    }
+  ],
+  "relationships": [
+    {
+      "between": [
+        "suspect1",
+        "suspect2"
+      ],
+      "type": "associés",
+      "isSecret": false
+    },
+    {
+      "between": [
+        "suspect2",
+        "suspect3"
+      ],
+      "type": "collègues",
+      "isSecret": true,
+      "note": "Ont travaillé ensemble sur un projet secret"
+    },
+    {
+      "between": [
+        "suspect4",
+        "suspect5"
+      ],
+      "type": "ennemis",
+      "isSecret": false
+    },
+    {
+      "between": [
+        "suspect3",
+        "suspect6"
+      ],
+      "type": "amis",
+      "isSecret": true
+    }
+  ],
+  "witnessedEvents": [
+    {
+      "description": "Jean-Pierre Martin et Isabelle Dufour ont été vus en train de discuter animément près de la salle de poker.",
+      "witnesses": [
+        "suspect2"
+      ],
+      "involves": [
+        "suspect1"
+      ]
+    },
+    {
+      "description": "Une violente dispute a éclaté entre Isabelle Dufour et un individu non identifié près de la sortie du casino.",
+      "witnesses": [
+        "suspect3",
+        "suspect4"
+      ],
+      "involves": []
+    },
+    {
+      "description": "Annelise Moreau a vu Isabelle Dufour quitter le casino seule, semblant contrariée.",
+      "witnesses": [
+        "suspect1"
+      ],
+      "involves": [
+        "suspect2"
+      ]
+    }
+  ],
+  "truth": {
+    "guiltySuspectId": "suspect4",
+    "murderWeaponId": "weapon4",
+    "motiveCore": "rivalité amoureuse",
+    "keyContradictions": []
+  }
+}

@@ -41,21 +41,30 @@ function getRecentSettings(maxFiles = 8) {
 }
 
 const STOP_WORDS = new Set([
-    'and','with','of','a','an','the','or','in','on','at','to','for','by','from','into','over','under','above','below','near','through','off','up','down','out','about','as'
+    'and', 'with', 'of', 'a', 'an', 'the', 'or', 'in', 'on', 'at', 'to', 'for', 'by', 'from', 'into', 'over', 'under', 'above', 'below', 'near', 'through', 'off', 'up', 'down', 'out', 'about', 'as'
 ]);
 
 const titleCase = (s) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
 
 function sanitizeWeaponName(name) {
     if (!name || typeof name !== 'string') return 'Weapon';
+    // Keep non-ASCII characters (for Hebrew/French names). Remove parenthetical notes.
     let base = name.replace(/\([^)]*\)/g, ' ');
+    // Tokenize by whitespace and punctuation but allow unicode letters
     let tokens = base
-        .split(/[^A-Za-z0-9]+/)
+        .split(/[^\p{L}\p{N}]+/u)
         .map(t => t.trim())
         .filter(Boolean)
         .filter(t => !STOP_WORDS.has(t.toLowerCase()));
     if (tokens.length > 3) tokens = tokens.slice(0, 3);
-    const cleaned = tokens.map(titleCase).join(' ').trim();
+    // If tokens are primarily non-latin, don't apply title-casing; return joined tokens
+    const latinCount = tokens.reduce((c, t) => c + (/^[A-Za-z0-9]+$/.test(t) ? 1 : 0), 0);
+    let cleaned;
+    if (latinCount === tokens.length) {
+        cleaned = tokens.map(titleCase).join(' ').trim();
+    } else {
+        cleaned = tokens.join(' ').trim();
+    }
     return cleaned || 'Weapon';
 }
 
