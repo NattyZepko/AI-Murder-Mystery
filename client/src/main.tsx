@@ -57,10 +57,14 @@ function AppInner() {
     (scenario?.weapons ?? []).forEach((w: any) => {
       const name = String(w?.name || '');
       const base = name.replace(/\([^)]*\)/g, ' ');
-      const tokens = tokenize(base, language)
-        .filter(t => t.length >= 4 || shortKeep.has(t.toLowerCase()))
+      // include tokens from the weapon name and any discoveredHints so mentions get colored
+      const nameTokens = tokenize(base, language).filter(t => t.length >= 3 || shortKeep.has(t.toLowerCase())).map(normalize);
+      const hintTokens = (Array.isArray(w?.discoveredHints) ? w.discoveredHints : [])
+        .map((h: any) => String(h || ''))
+        .flatMap((h: string) => tokenize(h, language))
+        .filter((t: string) => t.length >= 3)
         .map(normalize);
-      const uniq = Array.from(new Set(tokens));
+      const uniq = Array.from(new Set([...(nameTokens || []), ...(hintTokens || []), normalize(name)]));
       map[name] = uniq;
     });
     return map;

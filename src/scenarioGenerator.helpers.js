@@ -46,10 +46,10 @@ const STOP_WORDS = new Set([
 
 const titleCase = (s) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
 
-function sanitizeWeaponName(name) {
-    if (!name || typeof name !== 'string') return 'Weapon';
+function sanitizeWeaponName(name, discoveredHints = []) {
+    if (!name || typeof name !== 'string') name = '';
     // Keep non-ASCII characters (for Hebrew/French names). Remove parenthetical notes.
-    let base = name.replace(/\([^)]*\)/g, ' ');
+    let base = String(name).replace(/\([^)]*\)/g, ' ');
     // Tokenize by whitespace and punctuation but allow unicode letters
     let tokens = base
         .split(/[^\p{L}\p{N}]+/u)
@@ -65,7 +65,25 @@ function sanitizeWeaponName(name) {
     } else {
         cleaned = tokens.join(' ').trim();
     }
-    return cleaned || 'Weapon';
+    // If the model returned a generic name like "weapon" or nothing useful,
+    // try to derive a better fallback from discovered hints (e.g., "glass shard").
+    if (!cleaned || /^weapons?$|^murder\s*weapon$|^unknown$|^item$|^object$/i.test(cleaned) || cleaned.length < 3) {
+        // Use discovered hints to synthesize a concise noun phrase
+        if (Array.isArray(discoveredHints) && discoveredHints.length) {
+            // pick first meaningful hint and extract up to 3 content words
+            const hint = String(discoveredHints.find(h => h && String(h).trim()) || '').replace(/\([^)]*\)/g, ' ');
+            let htokens = hint.split(/[^\p{L}\p{N}]+/u).map(t => t.trim()).filter(Boolean).filter(t => !STOP_WORDS.has(t.toLowerCase()));
+            if (htokens.length > 3) htokens = htokens.slice(0, 3);
+            if (htokens.length) {
+                const latinCount2 = htokens.reduce((c, t) => c + (/^[A-Za-z0-9]+$/.test(t) ? 1 : 0), 0);
+                const candidate = latinCount2 === htokens.length ? htokens.map(titleCase).join(' ') : htokens.join(' ');
+                if (candidate && candidate.length >= 2) return candidate;
+            }
+        }
+        // Last resort friendly fallback that's still more descriptive than "Weapon"
+        return 'Unknown Item';
+    }
+    return cleaned;
 }
 
 function fisherYates(arr) {

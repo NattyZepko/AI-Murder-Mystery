@@ -368,7 +368,7 @@ function postProcessScenario(scenario) {
                     w.foundNearSuspectId = pick;
                 }
             });
-            (scenario.weapons || []).forEach(w => { try { w.name = sanitizeWeaponName(String(w.name || '')); } catch (_) { } });
+            (scenario.weapons || []).forEach(w => { try { w.name = sanitizeWeaponName(String(w.name || ''), Array.isArray(w.discoveredHints) ? w.discoveredHints : []); } catch (_) { } });
         } catch (_) { }
 
         // Ensure relationships & witnessed events plausible counts
@@ -433,7 +433,7 @@ async function generateScenarioStep2Suspects(language, context) {
         ? `Produce all output (names, descriptions, and JSON fields) in ${language}. Do not include translations or English fallbacks.`
         : `Produce all output in English.`);
     const example = examples.suspects || `[ {"id":"suspect1","name":"Liora Dayan","gender":"female","age":34,"mannerisms":["speaks quickly"],"quirks":["plays with ring"],"catchphrase":"Honestly!","backstory":"Research assistant.","relationshipToVictim":"colleague","motive":"jealousy","alibi":"in lab","alibiVerifiedBy":["suspect2"],"knowledge":["saw victim with another"],"contradictions":[],"isGuilty":false,"persona":"tense"} ]`;
-    const system = `You are a scenario generator. Output ONLY valid JSON (no explanation). Use EXACT English keys for suspects objects: id, name, gender, age, mannerisms, quirks, catchphrase, backstory, relationshipToVictim, motive, alibi, alibiVerifiedBy, knowledge, contradictions, isGuilty, persona. IMPORTANT: the field \"alibiVerifiedBy\" MUST be an array of suspect IDs that appear in this same suspects array (for example: [\"suspect1\", \"suspect2\"]). Do NOT include external evidences, freeform strings, or non-suspect identifiers (e.g., \"security footage\" or \"roommate\"). If no other suspect can verify an alibi, set \"alibiVerifiedBy\" to an empty array. Groups of 2 or 3 suspects confirming each other are allowed. ${langInstr}`;
+    const system = `You are a scenario generator. Output ONLY valid JSON (no explanation). Use EXACT English keys for suspects objects: id, name, gender, age, mannerisms, quirks, catchphrase, backstory, relationshipToVictim, motive, alibi, alibiVerifiedBy, knowledge, contradictions, isGuilty, persona. IMPORTANT: the field \"alibiVerifiedBy\" MUST be an array of suspect IDs that appear in this same suspects array (for example: [\"suspect1\", \"suspect2\"]). Do NOT include external evidences, freeform strings, or non-suspect identifiers (e.g., \"security footage\" or \"roommate\"). If no other suspect can verify an alibi, set \"alibiVerifiedBy\" to an empty array. Groups of 2 or 3 suspects confirming each other are allowed. Also, suspects MAY mention weapons they noticed nearby in their \"knowledge\" array (use weapon names exactly as they appear in the weapons array). ${langInstr}`;
     const user = `Context:\n${JSON.stringify({ title: context.title, setting: context.setting, victim: context.victim })}\nReturn ONLY a JSON array of 5–7 suspect objects (keys MUST match EXACTLY) matching this example schema: ${example}\nNOTE: For each suspect, the \"alibiVerifiedBy\" value MUST be an array of zero or more suspect IDs from the same array (no external evidence strings). Groups of 2 or 3 mutual verifiers are acceptable.`;
     const parsed = await fetchJsonWithRetries({ system, user, options: { temperature: 0.05, max_tokens: 1200, response_mime_type: 'application/json' }, schemaExample: example, language, retries: 2, partName: 'suspects' });
     console.log('SCENARIO_STEP2_SUSPECTS_PARSED_BEGIN');
@@ -477,8 +477,8 @@ async function generateScenarioStep3Weapons(language, context) {
         ? `Produce all output (names, descriptions, and JSON fields) in ${language}. Do not include translations or English fallbacks.`
         : `Produce all output in English.`);
     const example = examples.weapons || `[ {"id":"weapon1","name":"Garden Sickle","discoveredHints":["blood"],"isMurderWeapon":false,"foundOnSuspectId":"suspect2","foundNearSuspectId":null} ]`;
-    const system = `You are a scenario generator. Output ONLY valid JSON for weapons. Keys MUST be EXACTLY: id, name, discoveredHints, isMurderWeapon, foundOnSuspectId, foundNearSuspectId. ${langInstr}`;
-    const user = `Context suspects:\n${JSON.stringify(context.suspects)}\nReturn ONLY a JSON array of 4–6 weapons (keys MUST match EXACTLY) matching this example schema: ${example}`;
+    const system = `You are a scenario generator. Output ONLY valid JSON for weapons. Keys MUST be EXACTLY: id, name, discoveredHints, isMurderWeapon, foundOnSuspectId, foundNearSuspectId. IMPORTANT: the name field must be a meaningful, concise noun phrase (e.g., "Glass Shard", "Kitchen Knife", "Statue Base"). Do NOT set name to generic terms like \"weapon\", \"item\", or \"object\". Names should be short (1–3 words) and, where possible, be themed to the setting. ${langInstr}`;
+    const user = `Context suspects:\n${JSON.stringify(context.suspects)}\nReturn ONLY a JSON array of 4–6 weapons (keys MUST match EXACTLY) matching this example schema: ${example}\nIMPORTANT: Each weapon.name should be a concise, descriptive noun phrase (1–3 words). Provide realistic discoveredHints (short words or phrases) that can be used to derive better fallback names if needed.`;
     const parsed = await fetchJsonWithRetries({ system, user, options: { temperature: 0.05, max_tokens: 1000, response_mime_type: 'application/json' }, schemaExample: example, language, retries: 2, partName: 'weapons' });
     console.log('SCENARIO_STEP3_WEAPONS_PARSED_BEGIN');
     console.log(JSON.stringify(parsed, null, 2));
@@ -790,8 +790,8 @@ Ensure each suspect has a gender and age. Make personalities bold and distinct, 
                 w.foundNearSuspectId = pick;
             }
         });
-        // Fallback: sanitize weapon names to remove stopwords/prepositions (e.g., "from", "of", "with").
-        (scenario.weapons || []).forEach(w => { try { w.name = sanitizeWeaponName(String(w.name || '')); } catch (_) { } });
+        // Fallback: sanitize weapon names to remove stopwords/prepositions (e.g., "from", "of", "with"). Use discoveredHints to improve fallbacks.
+        (scenario.weapons || []).forEach(w => { try { w.name = sanitizeWeaponName(String(w.name || ''), Array.isArray(w.discoveredHints) ? w.discoveredHints : []); } catch (_) { } });
 
         // Enrich: some suspects know about weapons not on/near them (adds investigative misdirection & context)
         try {

@@ -1,6 +1,6 @@
 {
   "title": "היעלמותה של אנה",
-  "setting": "בית קפה נטוש על שפת הים בלילה סוער",
+  "setting": "בית קפה נטוש על שפת הים בליל סערה",
   "victim": {
     "name": "אנה גורן",
     "timeOfDeath": "23:45",
@@ -8,82 +8,30 @@
   },
   "suspects": [
     {
-      "id": "suspect5",
-      "name": "רויטל שמש",
-      "gender": "female",
-      "age": 38,
-      "mannerisms": [
-        "מלטפת חתול"
-      ],
-      "quirks": [
-        "אוספת בולים"
-      ],
-      "catchphrase": "אני לא בטוחה",
-      "backstory": "מנהלת בית קפה",
-      "relationshipToVictim": "לקוחה",
-      "motive": "כסף",
-      "alibi": "בבית",
-      "alibiVerifiedBy": [
-        "suspect4"
-      ],
-      "knowledge": [
-        "הקורבן הייתה עצובה"
-      ],
-      "contradictions": [],
-      "isGuilty": false,
-      "persona": "רגועה"
-    },
-    {
       "id": "suspect6",
-      "name": "יואב גולדברג",
+      "name": "יואב אברהם",
       "gender": "male",
       "age": 40,
       "mannerisms": [
-        "מסיח את הדעת"
-      ],
-      "quirks": [
-        "מכור לקפה"
-      ],
-      "catchphrase": "אני לא זוכר",
-      "backstory": "שוטר",
-      "relationshipToVictim": "איש קשר",
-      "motive": "סחיטה",
-      "alibi": "במשמרת",
-      "alibiVerifiedBy": [
-        "suspect2"
-      ],
-      "knowledge": [
-        "הקורבן הייתה מעורבת בעסקים מפוקפקים"
-      ],
-      "contradictions": [],
-      "isGuilty": false,
-      "persona": "חשדן"
-    },
-    {
-      "id": "suspect4",
-      "name": "איתמר לוי",
-      "gender": "male",
-      "age": 25,
-      "mannerisms": [
-        "מלקק אצבעות"
+        "ממלמל"
       ],
       "quirks": [
         "מנגן בגיטרה"
       ],
-      "catchphrase": "זה לא אני!",
-      "backstory": "ברמן",
+      "catchphrase": "אני לא בטוח...",
+      "backstory": "בעל בית הקפה.",
       "relationshipToVictim": "לקוחה קבועה",
-      "motive": "גניבה",
-      "alibi": "בעבודה",
+      "motive": "כסף",
+      "alibi": "בבית",
       "alibiVerifiedBy": [
         "suspect5"
       ],
       "knowledge": [
-        "שמע את הקורבן רבים עם מישהו"
+        "מצא סכין ליד הגופה"
       ],
       "contradictions": [],
       "isGuilty": false,
-      "persona": "מתוח"
+      "persona": "אדיש"
     },
     {
       "id": "suspect1",
@@ -97,7 +45,7 @@
         "ממשיכה לשחק בטבעת"
       ],
       "catchphrase": "בכנות!",
-      "backstory": "עוזרת מחקר",
+      "backstory": "עוזרת מחקר.",
       "relationshipToVictim": "עמית",
       "motive": "קנאה",
       "alibi": "במעבדה",
@@ -108,30 +56,6 @@
       "contradictions": [],
       "isGuilty": true,
       "persona": "מתוחה"
-    },
-    {
-      "id": "suspect3",
-      "name": "יעל בן דוד",
-      "gender": "female",
-      "age": 30,
-      "mannerisms": [
-        "מסתכלת סביב"
-      ],
-      "quirks": [
-        "שרטוטים"
-      ],
-      "catchphrase": "אני לא יודעת!",
-      "backstory": "אמנית רחוב",
-      "relationshipToVictim": "מכרה",
-      "motive": "לא ידוע",
-      "alibi": "בתצוגה",
-      "alibiVerifiedBy": [
-        "suspect2"
-      ],
-      "knowledge": [],
-      "contradictions": [],
-      "isGuilty": false,
-      "persona": "מסתורית"
     },
     {
       "id": "suspect2",
@@ -145,26 +69,136 @@
         "מתקן משקפיים"
       ],
       "catchphrase": "אני לא יודע!",
-      "backstory": "חבר ילדות",
+      "backstory": "חבר ילדות.",
       "relationshipToVictim": "חבר",
       "motive": "אהבה נכזבת",
       "alibi": "בבית",
       "alibiVerifiedBy": [
         "suspect3",
-        "suspect6"
+        "suspect4"
       ],
       "knowledge": [],
       "contradictions": [],
       "isGuilty": false,
       "persona": "עצבני"
+    },
+    {
+      "id": "suspect4",
+      "name": "איתמר לוי",
+      "gender": "male",
+      "age": 25,
+      "mannerisms": [
+        "מסיח את הדעת"
+      ],
+      "quirks": [
+        "נוגע בשערו"
+      ],
+      "catchphrase": "זה לא אני!",
+      "backstory": "ברמן בבית הקפה.",
+      "relationshipToVictim": "מכיר",
+      "motive": "גניבה",
+      "alibi": "בעבודה",
+      "alibiVerifiedBy": [
+        "suspect2"
+      ],
+      "knowledge": [
+        "ראה את הקורבן עם סכין"
+      ],
+      "contradictions": [],
+      "isGuilty": false,
+      "persona": "מתוח"
+    },
+    {
+      "id": "suspect3",
+      "name": "יעל בן דוד",
+      "gender": "female",
+      "age": 30,
+      "mannerisms": [
+        "מסתכלת סביב"
+      ],
+      "quirks": [
+        "שרטוטים"
+      ],
+      "catchphrase": "אני לא יודעת!",
+      "backstory": "אמנית רחוב.",
+      "relationshipToVictim": "מכרה",
+      "motive": "לא ידוע",
+      "alibi": "בתצוגה",
+      "alibiVerifiedBy": [
+        "suspect2"
+      ],
+      "knowledge": [],
+      "contradictions": [],
+      "isGuilty": false,
+      "persona": "מסתורית"
+    },
+    {
+      "id": "suspect5",
+      "name": "שירה גולדברג",
+      "gender": "female",
+      "age": 38,
+      "mannerisms": [
+        "מביטה למטה"
+      ],
+      "quirks": [
+        "מלקקת אצבעות"
+      ],
+      "catchphrase": "אני לא זוכרת!",
+      "backstory": "שכנה של הקורבן.",
+      "relationshipToVictim": "שכנה",
+      "motive": "ריב",
+      "alibi": "בבית",
+      "alibiVerifiedBy": [
+        "suspect6"
+      ],
+      "knowledge": [
+        "שמעה צעקות"
+      ],
+      "contradictions": [],
+      "isGuilty": false,
+      "persona": "פחדנית"
     }
   ],
   "weapons": [
     {
-      "id": "weapon2",
-      "name": "פלייר",
+      "id": "weapon3",
+      "name": "פיסת זכוכית",
       "discoveredHints": [
-        "סימני פריצה"
+        "חלקים קטנים",
+        "דם"
+      ],
+      "isMurderWeapon": true,
+      "foundOnSuspectId": null,
+      "foundNearSuspectId": "suspect1"
+    },
+    {
+      "id": "weapon4",
+      "name": "פטיש קטן",
+      "discoveredHints": [
+        "עקבות פגיעה",
+        "צבע"
+      ],
+      "isMurderWeapon": false,
+      "foundOnSuspectId": "suspect3",
+      "foundNearSuspectId": null
+    },
+    {
+      "id": "weapon1",
+      "name": "סכין מטבח",
+      "discoveredHints": [
+        "דם",
+        "טביעות אצבעות"
+      ],
+      "isMurderWeapon": false,
+      "foundOnSuspectId": null,
+      "foundNearSuspectId": "suspect6"
+    },
+    {
+      "id": "weapon2",
+      "name": "מפתח ברגים",
+      "discoveredHints": [
+        "שריטות",
+        "חלודה"
       ],
       "isMurderWeapon": false,
       "foundOnSuspectId": null,
@@ -172,92 +206,49 @@
     },
     {
       "id": "weapon5",
-      "name": "אקדח",
+      "name": "בקבוק ריק",
       "discoveredHints": [
-        "קליעים",
-        "אבק שריפה"
-      ],
-      "isMurderWeapon": false,
-      "foundOnSuspectId": "suspect6",
-      "foundNearSuspectId": null
-    },
-    {
-      "id": "weapon4",
-      "name": "פטיש",
-      "discoveredHints": [
-        "סימני פגיעה"
-      ],
-      "isMurderWeapon": false,
-      "foundOnSuspectId": null,
-      "foundNearSuspectId": "suspect2"
-    },
-    {
-      "id": "weapon6",
-      "name": "מפתח ברגים",
-      "discoveredHints": [
-        "סימני שריטות"
+        "שברים",
+        "נוזל"
       ],
       "isMurderWeapon": false,
       "foundOnSuspectId": null,
       "foundNearSuspectId": "suspect5"
-    },
-    {
-      "id": "weapon1",
-      "name": "סכין מטבח",
-      "discoveredHints": [
-        "דם",
-        "טביעות אצבע"
-      ],
-      "isMurderWeapon": true,
-      "foundOnSuspectId": null,
-      "foundNearSuspectId": "suspect1"
-    },
-    {
-      "id": "weapon3",
-      "name": "בקבוק זכוכית שבור",
-      "discoveredHints": [
-        "רסיסים",
-        "טביעות אצבע"
-      ],
-      "isMurderWeapon": false,
-      "foundOnSuspectId": null,
-      "foundNearSuspectId": "suspect3"
     }
   ],
   "timeline": [
     {
       "time": "22:30",
-      "summary": "אנה גורן נראתה ליד עמדת הקפה, נראתה עצובה",
+      "summary": "ליאורה ודניאל נראו יחדיו במעבדה.",
       "involvedSuspects": [
-        "suspect4",
-        "suspect5"
+        "suspect1",
+        "suspect2"
       ]
     },
     {
       "time": "23:00",
-      "summary": "שמעו ויכוח ליד עמדת הקפה",
+      "summary": "איתמר ראה את אנה עם סכין.",
       "involvedSuspects": [
-        "suspect1",
         "suspect4"
       ]
     },
     {
       "time": "23:15",
-      "summary": "ליאורה דיין נראתה יוצאת מהבניין במהירות",
+      "summary": "שירה שמעה צעקות מבית הקפה.",
       "involvedSuspects": [
-        "suspect1"
+        "suspect5"
       ]
     },
     {
       "time": "23:45",
-      "summary": "אנה גורן נמצאה מתה ליד עמדת הקפה",
+      "summary": "אנה נמצאה מתה ליד עמדת הקפה.",
       "involvedSuspects": []
     },
     {
-      "time": "00:15",
-      "summary": "דניאל כהן הגיע למקום, נראה מבוהל",
+      "time": "00:00",
+      "summary": "יואב מצא סכין ליד הגופה.",
       "involvedSuspects": [
-        "suspect2"
+        "suspect6"
       ]
     }
   ],
@@ -298,36 +289,38 @@
   ],
   "witnessedEvents": [
     {
-      "description": "ראתה את אנה גורן עצובה ליד עמדת הקפה",
+      "description": "ליאורה ודניאל נראו יחדיו במעבדה",
       "witnesses": [
-        "suspect5"
+        "suspect3"
       ],
       "involves": [
-        "suspect4"
+        "suspect1",
+        "suspect2"
       ]
     },
     {
-      "description": "שמע ויכוח ליד עמדת הקפה",
+      "description": "איתמר ראה את הקורבן עם סכין",
       "witnesses": [
-        "suspect1"
-      ],
-      "involves": [
-        "suspect4"
-      ]
-    },
-    {
-      "description": "ראתה את ליאורה דיין יוצאת מהבניין במהירות",
-      "witnesses": [
+        "suspect1",
         "suspect2"
       ],
       "involves": [
-        "suspect1"
+        "suspect4"
+      ]
+    },
+    {
+      "description": "שירה שמעה צעקות מבית הקפה",
+      "witnesses": [
+        "suspect6"
+      ],
+      "involves": [
+        "suspect5"
       ]
     }
   ],
   "truth": {
     "guiltySuspectId": "suspect1",
-    "murderWeaponId": "weapon1",
+    "murderWeaponId": "weapon3",
     "motiveCore": "קנאה",
     "keyContradictions": []
   }
