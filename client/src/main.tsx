@@ -37,10 +37,14 @@ function AppInner() {
   const [mentionedWeapons, setMentionedWeapons] = React.useState<Set<string>>(new Set());
   const [histories, setHistories] = React.useState<Record<string, ChatMessage[]>>({});
   const [debug, setDebug] = React.useState(false);
+  const [debugEnabled, setDebugEnabled] = React.useState(false); // easter-egg unlock to reveal debug button
   const [solved, setSolved] = React.useState(false);
   const [startTime, setStartTime] = React.useState<number | null>(null);
   const [elapsedMs, setElapsedMs] = React.useState<number>(0);
   const timerRef = React.useRef<number | null>(null);
+  const easterTimerRef = React.useRef<number | null>(null);
+  const easterBufferRef = React.useRef<string>('');
+  const easterListeningRef = React.useRef<boolean>(false);
   const [activeClueTab, setActiveClueTab] = React.useState<string>('all');
   const MAX_CLUES = 60;
 
@@ -132,6 +136,24 @@ function AppInner() {
       timerRef.current = null;
     }
   }, [startTime, solved]);
+
+  // Easter-egg: click the title, then type 'sus' within a short window to reveal the debug button
+  React.useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (!easterListeningRef.current) return;
+      const k = String(e.key || '').toLowerCase();
+      if (!/^[a-zA-Zא-ת]$/.test(k)) return; // allow letters (Latin/Hebrew) but ignore modifiers
+      easterBufferRef.current = (easterBufferRef.current + k).slice(-10);
+      if (easterBufferRef.current.endsWith('sus')) {
+        setDebugEnabled(true);
+        easterListeningRef.current = false;
+        easterBufferRef.current = '';
+        if (easterTimerRef.current) { window.clearTimeout(easterTimerRef.current); easterTimerRef.current = null; }
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => { window.removeEventListener('keydown', handler); if (easterTimerRef.current) { window.clearTimeout(easterTimerRef.current); easterTimerRef.current = null; } };
+  }, []);
 
   // --- MAIN LOGIC (generate, openSuspect, send, handleSolved, buildSystem, renderGamePage) ---
   const generate = async () => {
@@ -273,14 +295,20 @@ function AppInner() {
             ⏱ {formatDuration(elapsedMs)}
           </div>
         )}
-        <h1>{en.main.title}</h1>
+        <h1 onClick={() => {
+          // start listening for the easter-egg for 8 seconds
+          easterListeningRef.current = true;
+          easterBufferRef.current = '';
+          if (easterTimerRef.current) { window.clearTimeout(easterTimerRef.current); easterTimerRef.current = null; }
+          easterTimerRef.current = window.setTimeout(() => { easterListeningRef.current = false; easterBufferRef.current = ''; easterTimerRef.current = null; }, 8000);
+        }} style={{ cursor: 'default' }}>{en.main.title}</h1>
         <p>{en.main.intro1}</p>
         <p>{en.main.intro2}</p>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
           {(!scenario || solved) && (
             <button disabled={loading} onClick={generate}>{loading ? en.main.generating : (solved ? en.main.generateNewMystery : en.main.generateScenario)}</button>
           )}
-          {scenario && (
+          {scenario && debugEnabled && (
             <button onClick={() => setDebug(v => !v)}>{debug ? en.main.hideDebug : en.main.showDebug}</button>
           )}
         </div>
