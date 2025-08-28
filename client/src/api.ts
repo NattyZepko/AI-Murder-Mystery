@@ -1,5 +1,7 @@
+const API_BASE = (import.meta.env && (import.meta.env.VITE_API_BASE || import.meta.env.API_BASE)) || (window && (window as any).API_BASE) || '';
+
 export async function generateScenario(language?: string) {
-  const res = await fetch('/api/scenario', {
+  const res = await fetch(`${API_BASE}/api/scenario`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ language }),
@@ -18,7 +20,7 @@ export async function generateScenario(language?: string) {
 }
 
 export async function chat(system: string | undefined, messages: Array<{ role: 'user' | 'assistant', content: string }>, options?: any) {
-  const res = await fetch('/api/chat', {
+  const res = await fetch(`${API_BASE}/api/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ system, messages, options }),
@@ -29,7 +31,7 @@ export async function chat(system: string | undefined, messages: Array<{ role: '
 }
 
 export async function extractClues(payload: { reply: string, lastUserText: string, suspect: any, scenario: any, language?: string }) {
-  const res = await fetch('/api/extract-clues', {
+  const res = await fetch(`${API_BASE}/api/extract-clues`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -43,7 +45,7 @@ export async function extractClues(payload: { reply: string, lastUserText: strin
 export async function logClientFailure(payload: any) {
   try {
     // fire-and-forget; server will write to samples/
-    await fetch('/api/log-client-error', {
+    await fetch(`${API_BASE}/api/log-client-error`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),

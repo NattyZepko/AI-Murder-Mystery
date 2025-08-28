@@ -454,8 +454,8 @@ async function generateScenarioStep2Suspects(language, context) {
     let suspects = Array.isArray(parsed) ? parsed.slice() : [];
     // If the model returned too few suspects, ask for the missing ones and merge
     if (suspects.length < 5) {
-        // to do
-        const missing = 5 - suspects.length;
+        const maxSuspect = Math.random() * 3 + 5; // 5–8
+        const missing = maxSuspect - suspects.length;
         console.log(`generateScenarioStep2Suspects: only ${suspects.length} suspects returned, requesting ${missing} more`);
         const addSystem = `You are a scenario generator. Output ONLY a JSON array of additional suspect objects to augment an existing list. Produce exactly ${missing} suspects. ${langInstr}`;
         const existingIds = (suspects || []).map(s => s && s.id).filter(Boolean);
