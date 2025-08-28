@@ -5,6 +5,9 @@ const { getRecentSettings, sanitizeWeaponName, fisherYates, pickFew } = require(
 const fs = require('fs');
 const path = require('path');
 
+// In-memory buffer of recent raw AI replies (kept for diagnostics on critical failures)
+const RECENT_AI_REPLIES = [];
+
 // Helper: load language-specific AI template
 function loadAiTemplate(language = 'English') {
     try {
@@ -166,6 +169,11 @@ async function fetchJsonWithRetries({ system, user, options = {}, schemaExample 
     const call = async (sys, usr, opts) => await chatWithAI({ system: sys, messages: [{ role: 'user', content: usr }], options: opts });
     let res = await call(system, user, options);
     let content = String(res.message?.content ?? '').trim();
+    try {
+        // keep a short history of raw AI replies for later diagnostics
+        RECENT_AI_REPLIES.unshift({ partName, ts: Date.now(), content: String(content).slice(0, 20000) });
+        if (RECENT_AI_REPLIES.length > 20) RECENT_AI_REPLIES.length = 20;
+    } catch (_) { }
     const originalContent = content;
     const repairHistory = [{ type: 'initial', content: originalContent }];
     console.log(`fetchJsonWithRetries: received ${partName} raw length=${String(content).length}`);
@@ -432,8 +440,12 @@ async function generateScenarioStep2Suspects(language, context) {
     const langInstr = tpl.scenario_system_prefix || (language && String(language).toLowerCase() !== 'english'
         ? `Produce all output (names, descriptions, and JSON fields) in ${language}. Do not include translations or English fallbacks.`
         : `Produce all output in English.`);
-    const example = examples.suspects || `[ {"id":"suspect1","name":"Liora Dayan","gender":"female","age":34,"mannerisms":["speaks quickly"],"quirks":["plays with ring"],"catchphrase":"Honestly!","backstory":"Research assistant.","relationshipToVictim":"colleague","motive":"jealousy","alibi":"in lab","alibiVerifiedBy":["suspect2"],"knowledge":["saw victim with another"],"contradictions":[],"isGuilty":false,"persona":"tense"} ]`;
-    const system = `You are a scenario generator. Output ONLY valid JSON (no explanation). Use EXACT English keys for suspects objects: id, name, gender, age, mannerisms, quirks, catchphrase, backstory, relationshipToVictim, motive, alibi, alibiVerifiedBy, knowledge, contradictions, isGuilty, persona. IMPORTANT: the field \"alibiVerifiedBy\" MUST be an array of suspect IDs that appear in this same suspects array (for example: [\"suspect1\", \"suspect2\"]). Do NOT include external evidences, freeform strings, or non-suspect identifiers (e.g., \"security footage\" or \"roommate\"). If no other suspect can verify an alibi, set \"alibiVerifiedBy\" to an empty array. Groups of 2 or 3 suspects confirming each other are allowed. Also, suspects MAY mention weapons they noticed nearby in their \"knowledge\" array (use weapon names exactly as they appear in the weapons array). ${langInstr}`;
+    // Update: we instruct the model that "mannerisms" should be speech-focused
+    // (speech-mannerisms like 'speaks softly', 'answers evasively') and that
+    // "quirks" should be speech-specific quirks (stutter, word-finding pauses,
+    // echolalia, overuse of metaphors). Provide examples to bias generation.
+    const example = examples.suspects || `[ {"id":"suspect1","name":"Liora Dayan","gender":"female","age":34,"mannerisms":["speaks quickly","answers in short evasive replies"],"quirks":["stutters","word-finding pauses"],"catchphrase":"Honestly!","backstory":"Research assistant.","relationshipToVictim":"colleague","motive":"jealousy","alibi":"in lab","alibiVerifiedBy":["suspect2"],"knowledge":["saw victim with another"],"contradictions":[],"isGuilty":false,"persona":"tense"} ]`;
+    const system = `You are a scenario generator. Output ONLY valid JSON (no explanation). Use EXACT English keys for suspects objects: id, name, gender, age, mannerisms, quirks, catchphrase, backstory, relationshipToVictim, motive, alibi, alibiVerifiedBy, knowledge, contradictions, isGuilty, persona. NOTE: For this project we use 'mannerisms' specifically to mean speech-mannerisms (how the suspect speaks: speaking softly, shouting, answering in short evasive replies, interrupting, using a sing-song tone, etc.). We use 'quirks' to mean speech-quirks (stuttering, stammering, echolalia, frequent word-finding pauses, overuse of metaphors/analogies, monotone). Provide examples in those fields where appropriate. IMPORTANT: the field \"alibiVerifiedBy\" MUST be an array of suspect IDs that appear in this same suspects array (for example: [\"suspect1\", \"suspect2\"]). Do NOT include external evidences, freeform strings, or non-suspect identifiers (e.g., \"security footage\" or \"roommate\"). If no other suspect can verify an alibi, set \"alibiVerifiedBy\" to an empty array. Groups of 2 or 3 suspects confirming each other are allowed. Also, suspects MAY mention weapons they noticed nearby in their \"knowledge\" array (use weapon names exactly as they appear in the weapons array). ${langInstr}`;
     const user = `Context:\n${JSON.stringify({ title: context.title, setting: context.setting, victim: context.victim })}\nReturn ONLY a JSON array of 5–7 suspect objects (keys MUST match EXACTLY) matching this example schema: ${example}\nNOTE: For each suspect, the \"alibiVerifiedBy\" value MUST be an array of zero or more suspect IDs from the same array (no external evidence strings). Groups of 2 or 3 mutual verifiers are acceptable.`;
     const parsed = await fetchJsonWithRetries({ system, user, options: { temperature: 0.05, max_tokens: 1200, response_mime_type: 'application/json' }, schemaExample: example, language, retries: 2, partName: 'suspects' });
     console.log('SCENARIO_STEP2_SUSPECTS_PARSED_BEGIN');
@@ -442,6 +454,7 @@ async function generateScenarioStep2Suspects(language, context) {
     let suspects = Array.isArray(parsed) ? parsed.slice() : [];
     // If the model returned too few suspects, ask for the missing ones and merge
     if (suspects.length < 5) {
+        // to do
         const missing = 5 - suspects.length;
         console.log(`generateScenarioStep2Suspects: only ${suspects.length} suspects returned, requesting ${missing} more`);
         const addSystem = `You are a scenario generator. Output ONLY a JSON array of additional suspect objects to augment an existing list. Produce exactly ${missing} suspects. ${langInstr}`;
@@ -479,12 +492,56 @@ async function generateScenarioStep3Weapons(language, context) {
     const example = examples.weapons || `[ {"id":"weapon1","name":"Garden Sickle","discoveredHints":["blood"],"isMurderWeapon":false,"foundOnSuspectId":"suspect2","foundNearSuspectId":null} ]`;
     const system = `You are a scenario generator. Output ONLY valid JSON for weapons. Keys MUST be EXACTLY: id, name, discoveredHints, isMurderWeapon, foundOnSuspectId, foundNearSuspectId. IMPORTANT: the name field must be a meaningful, concise noun phrase (e.g., "Glass Shard", "Kitchen Knife", "Statue Base"). Do NOT set name to generic terms like \"weapon\", \"item\", or \"object\". Names should be short (1–3 words) and, where possible, be themed to the setting. ${langInstr}`;
     const user = `Context suspects:\n${JSON.stringify(context.suspects)}\nReturn ONLY a JSON array of 4–6 weapons (keys MUST match EXACTLY) matching this example schema: ${example}\nIMPORTANT: Each weapon.name should be a concise, descriptive noun phrase (1–3 words). Provide realistic discoveredHints (short words or phrases) that can be used to derive better fallback names if needed.`;
-    const parsed = await fetchJsonWithRetries({ system, user, options: { temperature: 0.05, max_tokens: 1000, response_mime_type: 'application/json' }, schemaExample: example, language, retries: 2, partName: 'weapons' });
+    // Attempt initial fetch
+    let parsed = await fetchJsonWithRetries({ system, user, options: { temperature: 0.05, max_tokens: 1000, response_mime_type: 'application/json' }, schemaExample: example, language, retries: 2, partName: 'weapons' });
     console.log('SCENARIO_STEP3_WEAPONS_PARSED_BEGIN');
     console.log(JSON.stringify(parsed, null, 2));
     console.log('SCENARIO_STEP3_WEAPONS_PARSED_END');
     if (!Array.isArray(parsed) || parsed.length < 4) throw new Error('Malformed weapons part: missing or too few weapons.');
     for (const w of parsed) if (!w.id || !w.name || !Array.isArray(w.discoveredHints) || typeof w.isMurderWeapon !== 'boolean') throw new Error('Malformed weapon entry: missing id, name, discoveredHints, or isMurderWeapon.');
+
+    // Detect generic weapon names (in multiple languages) and, if present,
+    // ask the AI to regenerate better names while preserving other fields.
+    const GENERIC_WORDS = new Set(['weapon', 'weapons', 'murder weapon', 'unknown', 'item', 'object', 'נשק', 'פריט', 'חפץ', 'כלי', 'אובייקט']);
+    const isGenericName = (s) => {
+        if (!s || typeof s !== 'string') return true;
+        const low = s.trim().toLowerCase();
+        if (GENERIC_WORDS.has(low)) return true;
+        if (/^weapons?$/.test(low)) return true;
+        if (low.length < 2) return true;
+        return false;
+    };
+
+    const maxRetries = 3;
+    let attempt = 0;
+    while (attempt < maxRetries) {
+        const bad = parsed.filter(w => isGenericName(String(w.name || '')));
+        if (bad.length === 0) break; // all good
+
+        // Prepare a focused repair prompt: request replacement names only
+        const repairSystem = `You are a scenario generator focused on weapon names. Output ONLY a JSON array of weapon objects matching the original schema: id, name, discoveredHints, isMurderWeapon, foundOnSuspectId, foundNearSuspectId. Keep all fields exactly as provided except REPLACE the 'name' fields for entries that were generic (e.g., "weapon", "item", "נשק"). Names MUST be meaningful, concise noun phrases (1-3 words) and MUST NOT be generic. Do NOT change ids or boolean flags. ${langInstr}`;
+        const repairUser = `Here are the current weapons JSON (some names are generic):\n${JSON.stringify(parsed, null, 2)}\n\nPlease return the full weapons array again but with improved 'name' values where needed. Keep discoveredHints and other fields intact. Return ONLY the JSON array.`;
+        try {
+            const repaired = await fetchJsonWithRetries({ system: repairSystem, user: repairUser, options: { temperature: 0.0, max_tokens: 800, response_mime_type: 'application/json' }, schemaExample: example, language, retries: 1, partName: 'weapons-repair' });
+            console.log('SCENARIO_STEP3_WEAPONS_REPAIRED_BEGIN');
+            console.log(JSON.stringify(repaired, null, 2));
+            console.log('SCENARIO_STEP3_WEAPONS_REPAIRED_END');
+            if (Array.isArray(repaired) && repaired.length >= 4) {
+                parsed = repaired;
+            }
+        } catch (e) {
+            console.log('weapons repair attempt failed:', e && e.message ? e.message : e);
+        }
+        attempt += 1;
+    }
+
+    // Final validation
+    const finalBad = parsed.filter(w => isGenericName(String(w.name || '')));
+    if (finalBad.length > 0) {
+        // If still generic after retries, throw so higher-level logic can handle it
+        throw new Error('Weapons contain generic names after regeneration attempts: ' + JSON.stringify(finalBad.map(b => b.name)));
+    }
+
     return parsed;
 }
 
@@ -567,6 +624,7 @@ Ensure each suspect has a gender and age. Make personalities bold and distinct, 
     try {
         content = res.message?.content ?? '';
         content = String(content).trim();
+        try { RECENT_AI_REPLIES.unshift({ partName: 'full_scenario', ts: Date.now(), content: String(content).slice(0, 200000) }); if (RECENT_AI_REPLIES.length > 50) RECENT_AI_REPLIES.length = 50; } catch (_) { }
         // Log the raw AI response for debugging
         console.log('SCENARIO_GENERATOR_RAW_AI_RESPONSE_BEGIN');
         console.log(content);
@@ -640,7 +698,51 @@ Ensure each suspect has a gender and age. Make personalities bold and distinct, 
         throw new Error('Scenario malformed: missing weapons');
     }
     if (!scenario.truth || typeof scenario.truth !== 'object') {
-        throw new Error('Scenario malformed: missing truth');
+        // Try to infer truth from suspect/weapon flags present in the parsed scenario
+        try {
+            let guiltyId = null;
+            let murderWeaponId = null;
+            if (Array.isArray(scenario.suspects)) {
+                const flagged = scenario.suspects.find(s => s && (s.isGuilty === true || String(s.isGuilty).toLowerCase() === 'true'));
+                if (flagged && flagged.id) guiltyId = flagged.id;
+            }
+            if (Array.isArray(scenario.weapons)) {
+                const flaggedW = scenario.weapons.find(w => w && (w.isMurderWeapon === true || String(w.isMurderWeapon).toLowerCase() === 'true'));
+                if (flaggedW && flaggedW.id) murderWeaponId = flaggedW.id;
+            }
+            // If weapon flagged but no guilty suspect flagged, try to infer guilty from weapon proximity fields
+            if (!guiltyId && murderWeaponId && Array.isArray(scenario.weapons)) {
+                const mw = scenario.weapons.find(w => w && w.id === murderWeaponId);
+                if (mw) {
+                    if (mw.foundOnSuspectId) guiltyId = mw.foundOnSuspectId;
+                    else if (mw.foundNearSuspectId) guiltyId = mw.foundNearSuspectId;
+                }
+            }
+            if (!scenario.truth) scenario.truth = {};
+            if (guiltyId) scenario.truth.guiltySuspectId = guiltyId;
+            if (murderWeaponId) scenario.truth.murderWeaponId = murderWeaponId;
+            if (guiltyId || murderWeaponId) {
+                scenario.truth.motiveCore = scenario.truth.motiveCore || '';
+                scenario.truth.keyContradictions = scenario.truth.keyContradictions || [];
+            }
+            // If still missing required truth pieces, persist diagnostics and fail
+            if (!scenario.truth.guiltySuspectId || !scenario.truth.murderWeaponId) {
+                const samplesDir = path.resolve(__dirname, '..', 'samples');
+                if (!fs.existsSync(samplesDir)) fs.mkdirSync(samplesDir, { recursive: true });
+                const fn = path.resolve(samplesDir, `bad_ai_response_missing_truth_${Date.now()}.log`);
+                const dump = {
+                    note: 'Missing truth detected during validation',
+                    ts: new Date().toISOString(),
+                    recentAIReplies: RECENT_AI_REPLIES.slice(0, 10),
+                    partialScenario: scenario
+                };
+                try { fs.writeFileSync(fn, JSON.stringify(dump, null, 2), 'utf8'); console.error('Saved missing-truth diagnostics to', fn); } catch (_) { }
+                throw new Error('Scenario malformed: missing truth');
+            }
+        } catch (err) {
+            try { console.error('Error during truth inference:', err && err.message ? err.message : err); } catch (_) { }
+            throw new Error('Scenario malformed: missing truth');
+        }
     }
     // Ensure suspects have gender/age; if missing, fill with sane defaults. Also normalize new fields.
     try {

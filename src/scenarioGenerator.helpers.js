@@ -67,7 +67,15 @@ function sanitizeWeaponName(name, discoveredHints = []) {
     }
     // If the model returned a generic name like "weapon" or nothing useful,
     // try to derive a better fallback from discovered hints (e.g., "glass shard").
-    if (!cleaned || /^weapons?$|^murder\s*weapon$|^unknown$|^item$|^object$/i.test(cleaned) || cleaned.length < 3) {
+    // Also treat common generic tokens in other languages (e.g., Hebrew "נשק") as non-descriptive.
+    const GENERIC_WORDS = new Set([
+        'weapon', 'weapons', 'murder weapon', 'unknown', 'item', 'object',
+        // Hebrew
+        'נשק', 'פריט', 'חפץ', 'כלי', 'אובייקט'
+    ]);
+    const cleanedLower = String(cleaned || '').toLowerCase();
+    const isGeneric = !cleaned || /^weapons?$|^murder\s*weapon$|^unknown$|^item$|^object$/i.test(cleaned) || cleaned.length < 3 || GENERIC_WORDS.has(cleanedLower);
+    if (isGeneric) {
         // Use discovered hints to synthesize a concise noun phrase
         if (Array.isArray(discoveredHints) && discoveredHints.length) {
             // pick first meaningful hint and extract up to 3 content words
@@ -80,8 +88,10 @@ function sanitizeWeaponName(name, discoveredHints = []) {
                 if (candidate && candidate.length >= 2) return candidate;
             }
         }
-        // Last resort friendly fallback that's still more descriptive than "Weapon"
-        return 'Unknown Item';
+        // Last resort friendly fallback. If the original name contained Hebrew
+        // characters, return a Hebrew-localized fallback; otherwise return English.
+        const hasHebrew = /[\u0590-\u05FF]/.test(String(name));
+        return hasHebrew ? 'פריט לא ידוע' : 'Unknown Item';
     }
     return cleaned;
 }

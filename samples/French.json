@@ -1,132 +1,86 @@
 {
-  "title": "Mort au Casino",
-  "setting": "Un casino luxueux, tard dans la nuit",
+  "title": "Meurtre à la Galerie",
+  "setting": "Une galerie d'art sombre après la fermeture",
   "victim": {
-    "name": "Isabelle Dufour",
-    "timeOfDeath": "03:00",
-    "location": "Salle de poker"
+    "name": "Jean-Pierre Martel",
+    "timeOfDeath": "01:15",
+    "location": "Salle des sculptures"
   },
   "suspects": [
     {
       "id": "suspect1",
-      "name": "Jean-Pierre Martin",
-      "gender": "male",
-      "age": 45,
-      "mannerisms": [
-        "toussote souvent"
-      ],
-      "quirks": [
-        "ajuste ses lunettes"
-      ],
-      "catchphrase": "C'est impossible !",
-      "backstory": "Croupier",
-      "relationshipToVictim": "collègue",
-      "motive": "argent",
-      "alibi": "au travail",
-      "alibiVerifiedBy": [],
-      "knowledge": [
-        "arme du crime"
-      ],
-      "contradictions": [],
-      "isGuilty": true,
-      "persona": "agité"
-    },
-    {
-      "id": "suspect4",
-      "name": "Sophie Bernard",
+      "name": "Liora Dayan",
       "gender": "female",
-      "age": 25,
+      "age": 34,
       "mannerisms": [
-        "se ronge les ongles"
+        "parle rapidement",
+        "répond par de courtes réponses évasives"
       ],
       "quirks": [
-        "écoute toujours de la musique"
+        "bégaye",
+        "pauses de recherche de mots"
       ],
-      "catchphrase": "Sérieusement ?",
-      "backstory": "Chanteuse",
-      "relationshipToVictim": "amie",
-      "motive": "héritage",
-      "alibi": "en spectacle",
+      "catchphrase": "Honnêtement !",
+      "backstory": "Assistante de recherche.",
+      "relationshipToVictim": "collègue",
+      "motive": "jalousie",
+      "alibi": "au laboratoire",
       "alibiVerifiedBy": [
         "suspect2"
       ],
       "knowledge": [],
       "contradictions": [],
       "isGuilty": false,
-      "persona": "inquiète"
+      "persona": "tendue"
     },
     {
       "id": "suspect2",
-      "name": "Anne Dupont",
-      "gender": "female",
-      "age": 30,
+      "name": "Marc Dubois",
+      "gender": "male",
+      "age": 52,
       "mannerisms": [
-        "joue avec ses cheveux"
+        "se racler la gorge avant de parler"
       ],
       "quirks": [
-        "porte toujours du rouge"
+        "surutilise des métaphores"
       ],
-      "catchphrase": "Je n'y comprends rien !",
-      "backstory": "Serveuse",
+      "catchphrase": "C'est incroyable !",
+      "backstory": "Garde.",
       "relationshipToVictim": "connaissance",
-      "motive": "vengeance",
-      "alibi": "au bar",
+      "motive": "vol",
+      "alibi": "en ronde",
       "alibiVerifiedBy": [
-        "suspect3",
-        "suspect4"
+        "suspect1"
       ],
       "knowledge": [],
       "contradictions": [],
       "isGuilty": false,
-      "persona": "mystérieuse"
+      "persona": "énigmatique"
     },
     {
       "id": "suspect3",
-      "name": "Bernard Petit",
-      "gender": "male",
-      "age": 60,
+      "name": "Sophie Lefevre",
+      "gender": "female",
+      "age": 28,
       "mannerisms": [
-        "se gratte la tête"
+        "parle doucement"
       ],
       "quirks": [
-        "collectionne les pièces de monnaie"
+        "tonalité monotone"
       ],
-      "catchphrase": "C'est incroyable !",
-      "backstory": "Joueur régulier",
-      "relationshipToVictim": "connaissance",
-      "motive": "jeu",
-      "alibi": "au casino",
+      "catchphrase": "Je ne sais pas.",
+      "backstory": "Employée de galerie.",
+      "relationshipToVictim": "collègue",
+      "motive": "rancune",
+      "alibi": "à la maison",
       "alibiVerifiedBy": [
+        "suspect1",
         "suspect2"
       ],
-      "knowledge": [
-        "arme du crime"
-      ],
-      "contradictions": [],
-      "isGuilty": false,
-      "persona": "calme"
-    },
-    {
-      "id": "suspect5",
-      "name": "Antoine Moreau",
-      "gender": "male",
-      "age": 38,
-      "mannerisms": [
-        "fume beaucoup"
-      ],
-      "quirks": [
-        "porte toujours un chapeau"
-      ],
-      "catchphrase": "C'est dommage !",
-      "backstory": "Homme d'affaires",
-      "relationshipToVictim": "amant",
-      "motive": "passion",
-      "alibi": "à une réunion",
-      "alibiVerifiedBy": [],
       "knowledge": [],
       "contradictions": [],
       "isGuilty": false,
-      "persona": "secret"
+      "persona": "nerveuse"
     }
   ],
   "weapons": [
@@ -140,50 +94,6 @@
       "isMurderWeapon": true,
       "foundOnSuspectId": "suspect1",
       "foundNearSuspectId": null
-    },
-    {
-      "id": "weapon3",
-      "name": "Cendrier Lourd",
-      "discoveredHints": [
-        "métal",
-        "fissuré"
-      ],
-      "isMurderWeapon": false,
-      "foundOnSuspectId": null,
-      "foundNearSuspectId": "suspect2"
-    },
-    {
-      "id": "weapon4",
-      "name": "Poignard",
-      "discoveredHints": [
-        "lame",
-        "tache"
-      ],
-      "isMurderWeapon": false,
-      "foundOnSuspectId": null,
-      "foundNearSuspectId": "suspect4"
-    },
-    {
-      "id": "weapon2",
-      "name": "Bouteille cassée",
-      "discoveredHints": [
-        "verre",
-        "éclats"
-      ],
-      "isMurderWeapon": false,
-      "foundOnSuspectId": null,
-      "foundNearSuspectId": "suspect3"
-    },
-    {
-      "id": "weapon5",
-      "name": "Statuette",
-      "discoveredHints": [
-        "base lourde",
-        "fêlée"
-      ],
-      "isMurderWeapon": false,
-      "foundOnSuspectId": null,
-      "foundNearSuspectId": "suspect5"
     }
   ],
   "timeline": [
@@ -193,39 +103,6 @@
       "involvedSuspects": [
         "suspect5"
       ]
-    },
-    {
-      "time": "23:00",
-      "summary": "Une dispute a éclaté entre Isabelle Dufour et Jean-Pierre Martin.",
-      "involvedSuspects": [
-        "suspect1"
-      ]
-    },
-    {
-      "time": "00:00",
-      "summary": "Anne Dupont a quitté le bar et est rentrée chez elle.",
-      "involvedSuspects": [
-        "suspect2"
-      ]
-    },
-    {
-      "time": "01:00",
-      "summary": "Bernard Petit a été vu au casino.",
-      "involvedSuspects": [
-        "suspect3"
-      ]
-    },
-    {
-      "time": "02:00",
-      "summary": "Sophie Bernard a terminé son spectacle.",
-      "involvedSuspects": [
-        "suspect4"
-      ]
-    },
-    {
-      "time": "03:00",
-      "summary": "Isabelle Dufour a été retrouvée morte dans la salle de poker.",
-      "involvedSuspects": []
     }
   ],
   "relationships": [
@@ -236,45 +113,9 @@
       ],
       "type": "associés",
       "isSecret": false
-    },
-    {
-      "between": [
-        "suspect2",
-        "suspect3"
-      ],
-      "type": "collègues",
-      "isSecret": true,
-      "note": "Ont travaillé ensemble sur un projet secret"
-    },
-    {
-      "between": [
-        "suspect3",
-        "suspect4"
-      ],
-      "type": "ennemis",
-      "isSecret": false
-    },
-    {
-      "between": [
-        "suspect4",
-        "suspect5"
-      ],
-      "type": "amis",
-      "isSecret": true,
-      "note": "Enfance commune"
     }
   ],
   "witnessedEvents": [
-    {
-      "description": "Isabelle Dufour et Antoine Moreau ont été vus ensemble dans un bar.",
-      "witnesses": [
-        "suspect2",
-        "suspect3"
-      ],
-      "involves": [
-        "suspect5"
-      ]
-    },
     {
       "description": "Une dispute a éclaté entre Isabelle Dufour et Jean-Pierre Martin.",
       "witnesses": [
@@ -282,16 +123,6 @@
       ],
       "involves": [
         "suspect1"
-      ]
-    },
-    {
-      "description": "Anne Dupont a quitté le bar et est rentrée chez elle.",
-      "witnesses": [
-        "suspect1",
-        "suspect3"
-      ],
-      "involves": [
-        "suspect2"
       ]
     }
   ],

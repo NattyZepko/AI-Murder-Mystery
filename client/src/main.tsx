@@ -148,6 +148,22 @@ function AppInner() {
         sc = await generateScenario(language);
       } catch (e2: any) {
         setError(e2.message || en.main.generateScenario);
+        try {
+          // Send diagnostics to server for later inspection
+          // Import dynamically to avoid circular/unused import at module top
+          const { logClientFailure } = await import('./api');
+          const payload = {
+            ts: Date.now(),
+            language,
+            clientAction: 'generateScenario',
+            attempts: 2,
+            error: { message: e2.message || String(e2), status: e2.status || null },
+            serverBody: e2.body || null,
+            // include some local context that may help debugging
+            recentSettings: null,
+          };
+          logClientFailure(payload);
+        } catch (_) { }
       }
     }
     if (sc) {
