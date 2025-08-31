@@ -76,7 +76,7 @@
     }
   },
   "chat": {
-    "you": "אתה",
+    "you": "את/ה",
     "suspect": "חשוד",
     "placeholder": "שאל שאלה…",
     "thinking": "חושב…",

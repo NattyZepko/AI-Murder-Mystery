@@ -20,8 +20,11 @@ export function buildSystemForSuspect(suspect: any, sc: any, language?: string) 
     ? `Produce all responses in ${language}. Return all names, descriptions, and JSON fields in ${language}.`
     : `Produce all responses in English.`;
   const mentionWeaponsInstr = language && String(language).toLowerCase() !== 'english'
-    ? `When the user asks light, non-accusatory questions about your surroundings or belongings, casually mention nearby or accessible weapons if relevant. Keep mentions natural and brief, and do not confess or admit guilt. Produce this response in ${language}.`
-    : `When the user asks light, non-accusatory questions about your surroundings or belongings, casually mention nearby or accessible weapons if relevant. Keep mentions natural and brief, and do not confess or admit guilt.`;
+    ? `Only mention nearby or accessible weapons when the user asks a direct, non-accusatory question about your possessions or surroundings (for example: "Do you keep anything on you?" or "What's in your coat?"). Do NOT change the subject to weapons, do not volunteer weapon information unprompted, and do not admit guilt. Keep any mention short (one sentence), factual, and in-character. Produce this response in ${language}.`
+    : `Only mention nearby or accessible weapons when the user asks a direct, non-accusatory question about your possessions or surroundings (for example: "Do you keep anything on you?" or "What's in your coat?"). Do NOT change the subject to weapons, do not volunteer weapon information unprompted, and do not admit guilt. Keep any mention short (one sentence), factual, and in-character.`;
+  const revealRelationshipInstr = language && String(language).toLowerCase() !== 'english'
+    ? `If you are aware of a relationship between two other people in the scenario (for example: rivals, lovers, estranged siblings), you may mention one such relationship only when the user directly asks about one of the people involved. Do NOT volunteer relationships unprompted and do NOT invent relationships you are not sure about. Keep the disclosure brief and factual. Produce this response in ${language}.`
+    : `If you are aware of a relationship between two other people in the scenario (for example: rivals, lovers, estranged siblings), you may mention one such relationship only when the user directly asks about one of the people involved. Do NOT volunteer relationships unprompted and do NOT invent relationships you are not sure about. Keep the disclosure brief and factual.`;
   return [
     langInstr,
     mentionWeaponsInstr,
@@ -29,6 +32,10 @@ export function buildSystemForSuspect(suspect: any, sc: any, language?: string) 
     'Stay in character; do not reveal meta info or the culprit.',
     'Avoid stage directions; convey emotion by word choice only.',
     'If the user asks questions unrelated to the murder, the case, or the scenario, respond in-character and gently steer the conversation back to the investigation.',
+  'Example of desired behavior regarding weapons (one-shot):',
+  'User: Do you keep anything on you?\nSuspect: I usually carry a small flashlight in my coat pocket. Nothing special, just for checking the cellar.\n',
+  'Example of desired behavior regarding relationships (one-shot):',
+  'User: Do you know anything about Alex?\nSuspect: Alex and Jordan have been rivals at the factory for years — they argue over shifts.\n',
     `Shared scenario: ${shared}`,
     'Context (JSON, safe):',
     JSON.stringify({
