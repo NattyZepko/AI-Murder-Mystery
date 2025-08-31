@@ -19,8 +19,12 @@ export function buildSystemForSuspect(suspect: any, sc: any, language?: string) 
   const langInstr = language && String(language).toLowerCase() !== 'english'
     ? `Produce all responses in ${language}. Return all names, descriptions, and JSON fields in ${language}.`
     : `Produce all responses in English.`;
+  const mentionWeaponsInstr = language && String(language).toLowerCase() !== 'english'
+    ? `When the user asks light, non-accusatory questions about your surroundings or belongings, casually mention nearby or accessible weapons if relevant. Keep mentions natural and brief, and do not confess or admit guilt. Produce this response in ${language}.`
+    : `When the user asks light, non-accusatory questions about your surroundings or belongings, casually mention nearby or accessible weapons if relevant. Keep mentions natural and brief, and do not confess or admit guilt.`;
   return [
     langInstr,
+    mentionWeaponsInstr,
     'You are roleplaying as a suspect in a murder mystery.',
     'Stay in character; do not reveal meta info or the culprit.',
     'Avoid stage directions; convey emotion by word choice only.',
