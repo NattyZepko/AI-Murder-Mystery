@@ -2,6 +2,7 @@ const { chatWithAI } = require('./ai');
 const fs = require('fs');
 const path = require('path');
 const { loadAiTemplate: loadAiTemplateFromI18n } = require('./i18n');
+const { fetchJsonWithRetries: fetchJsonWithRetriesUtil } = require('./utils/jsonRepair');
 function loadAiTemplate(language = 'English') { return loadAiTemplateFromI18n(language); }
 
 // Ask AI to summarize only meaningful clues; returns [{ type, note }]
@@ -26,49 +27,25 @@ Context:
 - Suspects: ${suspectsList}
 - Current suspect: ${suspect.name}`;
   const content = `User asked: ${lastUserText || ''}\nSuspect replied: ${reply}`;
-    const res = await chatWithAI({
-      system,
-      messages: [{ role: 'user', content }],
-      options: { temperature: 0.1, top_p: 0.2, max_tokens: 220 }
-    });
-    let payload = res.message?.content || '';
-    let json;
+    // Use centralized JSON repair/parse helper for robust parsing and automated repair
+    const userContent = `User asked: ${lastUserText || ''}\nSuspect replied: ${reply}`;
+    let parsed = null;
     try {
-      json = JSON.parse(payload);
-    } catch (e) {
-      // Attempt to extract JSON substring
-      const first = payload.indexOf('{');
-      const last = payload.lastIndexOf('}');
-      if (first >= 0 && last > first) {
-        const maybe = payload.slice(first, last + 1);
-        try {
-          json = JSON.parse(maybe);
-        } catch (_) {
-          // Attempt automated repair by asking the model to output STRICT JSON only
-          try {
-            const tpl2 = loadAiTemplate(language) || {};
-            const repairSystem = tpl2.clues_system_prefix
-              ? `${tpl2.clues_system_prefix} Do NOT add any explanations; output ONLY valid JSON.`
-              : `You are a JSON fixer. Output ONLY valid JSON with a top-level \"clues\" array. Do not include markdown or commentary.`;
-            const repairUser = `Here is the assistant's previous reply that failed to parse:\n---\n${String(payload).slice(0, 2000)}\n---\nPlease output only the corrected JSON object now.`;
-            const repairRes = await chatWithAI({ system: repairSystem, messages: [{ role: 'user', content: repairUser }], options: { temperature: 0.0, top_p: 1.0, max_tokens: 600 } });
-            let repaired = String(repairRes.message?.content || '').trim();
-            if (/^```/.test(repaired)) {
-              const firstNl = repaired.indexOf('\n');
-              if (firstNl !== -1) repaired = repaired.slice(firstNl + 1);
-              if (repaired.endsWith('```')) repaired = repaired.slice(0, -3);
-              repaired = repaired.trim();
-            }
-            json = JSON.parse(repaired);
-          } catch (_) {
-            return [];
-          }
-        }
-      } else {
-        return [];
-      }
+      parsed = await fetchJsonWithRetriesUtil({
+        system,
+        user: userContent,
+        options: { temperature: 0.1, top_p: 0.2, max_tokens: 220 },
+        schemaExample: `{ "clues": [ { "type": "weapon", "note": "Kitchen Knife found near suspect X", "strength": "medium" } ] }`,
+        language,
+        retries: 1,
+        partName: 'clues',
+        callAI: async ({ system: sys, messages: msgs, options: opts }) => await chatWithAI({ system: sys, messages: msgs, options: opts }),
+        recentRepliesArray: null
+      });
+    } catch (err) {
+      return [];
     }
-    const clues = Array.isArray(json?.clues) ? json.clues : [];
+    const clues = Array.isArray(parsed?.clues) ? parsed.clues : [];
     return clues
       .filter(c => c && typeof c.note === 'string' && /^(medium|high)$/i.test(c.strength || ''))
       .map(c => {

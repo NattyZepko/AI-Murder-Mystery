@@ -286,9 +286,9 @@ function AppInner() {
     setSolved(true);
     if (startTime) {
       const ms = Date.now() - startTime;
-      setSuccessMessage(`🎉 ${en.main.congratulations || 'Congratulations!'} ${en.main.solvedIn || 'You solved the mystery in'} ${formatDuration(ms)}.`);
+      setSuccessMessage(`🎉 ${en.main.congratulations || 'Congratulations!'} \n${en.main.solvedIn || 'You solved the mystery in'} ${formatDuration(ms)}.`);
     } else {
-      setSuccessMessage(`🎉 ${en.main.congratulations || 'Congratulations!'} ${en.main.solved || 'You solved the mystery.'}`);
+      setSuccessMessage(`🎉 ${en.main.congratulations || 'Congratulations!'} \n${en.main.solved || 'You solved the mystery.'}`);
     }
     // randomly pick a celebration
     const methods: Array<'confetti' | 'fireworks' | 'emoji'> = ['confetti', 'fireworks', 'emoji']
@@ -402,7 +402,7 @@ function AppInner() {
                 <div>
                   <SubmitPanel scenario={scenario} mentionedWeapons={mentionedWeapons} onSolved={handleSolved} />
                   {successMessage && (
-                    <div style={{ marginTop: 12, padding: 12, background: 'linear-gradient(90deg,#064e3b,#065f46)', borderRadius: 8, color: '#ecfccb' }}>
+                    <div style={{ marginTop: 12, padding: 12, background: 'linear-gradient(90deg,#064e3b,#065f46)', borderRadius: 8, color: '#ecfccb', whiteSpace: 'pre-line' }}>
                       {successMessage}
                     </div>
                   )}
