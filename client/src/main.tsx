@@ -15,6 +15,7 @@ import { formatDuration } from './utils/time';
 import { buildSystemForSuspect } from './utils/buildSystem';
 import { tokenize } from './utils/tokenize';
 import LocaleProvider, { useLocale, useLanguage } from './i18n/LocaleProvider';
+import Celebration from './components/Celebration';
 
 // Set the body background to match the app background
 if (typeof document !== 'undefined') {
@@ -39,6 +40,8 @@ function AppInner() {
   const [debug, setDebug] = React.useState(false);
   const [debugEnabled, setDebugEnabled] = React.useState(false); // easter-egg unlock to reveal debug button
   const [solved, setSolved] = React.useState(false);
+  const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
+  const [celebrationMethod, setCelebrationMethod] = React.useState<'confetti' | 'fireworks' | 'emoji' | null>(null);
   const [startTime, setStartTime] = React.useState<number | null>(null);
   const [elapsedMs, setElapsedMs] = React.useState<number>(0);
   const timerRef = React.useRef<number | null>(null);
@@ -189,6 +192,9 @@ function AppInner() {
       }
     }
     if (sc) {
+      // hide previous success and stop celebration when generating a new scenario
+      setSuccessMessage(null);
+      setCelebrationMethod(null);
       try {
         if (Array.isArray(sc.suspects)) {
           const arr = [...sc.suspects];
@@ -215,8 +221,9 @@ function AppInner() {
   };
 
   const openSuspect = (id: string) => {
-    setActiveSuspectId(id);
-    setMessages(histories[id] || []);
+  if (solved) return; // disable opening suspect chats after solved
+  setActiveSuspectId(id);
+  setMessages(histories[id] || []);
   };
 
   const send = async (text: string) => {
@@ -279,10 +286,14 @@ function AppInner() {
     setSolved(true);
     if (startTime) {
       const ms = Date.now() - startTime;
-      window.alert(`Congratulations! You solved the mystery in ${formatDuration(ms)}.`);
+      setSuccessMessage(`🎉 ${en.main.congratulations || 'Congratulations!'} ${en.main.solvedIn || 'You solved the mystery in'} ${formatDuration(ms)}.`);
     } else {
-      window.alert('Congratulations! You solved the mystery.');
+      setSuccessMessage(`🎉 ${en.main.congratulations || 'Congratulations!'} ${en.main.solved || 'You solved the mystery.'}`);
     }
+    // randomly pick a celebration
+    const methods: Array<'confetti' | 'fireworks' | 'emoji'> = ['confetti', 'fireworks', 'emoji']
+    const pick = methods[Math.floor(Math.random() * methods.length)]
+    setCelebrationMethod(pick)
   };
 
   // buildSystem moved to util
@@ -336,8 +347,11 @@ function AppInner() {
                             textAlign: 'left',
                             background: activeSuspectId === s.id ? '#334155' : '#475569',
                             color: '#f3f4f6',
+                            cursor: solved ? 'not-allowed' : 'pointer',
                             transition: 'background 0.2s',
                           }}
+                          disabled={solved}
+                          title={solved ? 'Chat disabled after solving' : undefined}
                         >
                           <div style={{ display: 'grid', gridTemplateColumns: '36px 8px 1fr', alignItems: 'center', columnGap: 8, minHeight: 36 }}>
                             <AvatarFace gender={s.gender} age={s.age} persona={s.persona || s.mannerisms?.join(' ')} size={36} accentColor={suspectColorById[s.id]} />
@@ -367,6 +381,7 @@ function AppInner() {
                         thinking={thinking}
                         messages={messages}
                         onSend={send}
+                        disabled={solved}
                         colorize={(t: string) => {
                           // For Hebrew, normalize suspect names for RTL and possible diacritics
                           let normalizedSuspectNameToColor = { ...suspectNameToColor };
@@ -386,6 +401,19 @@ function AppInner() {
                 </div>
                 <div>
                   <SubmitPanel scenario={scenario} mentionedWeapons={mentionedWeapons} onSolved={handleSolved} />
+                  {successMessage && (
+                    <div style={{ marginTop: 12, padding: 12, background: 'linear-gradient(90deg,#064e3b,#065f46)', borderRadius: 8, color: '#ecfccb' }}>
+                      {successMessage}
+                    </div>
+                  )}
+                  {celebrationMethod && (
+                    // Celebration overlays the page with canvas effects
+                    <div>
+                      {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+                      {/* @ts-ignore */}
+                      <Celebration method={celebrationMethod} duration={6000} />
+                    </div>
+                  )}
                   <div style={{ marginTop: 16 }}>
                     <h3>{en.main.cluesTitle}</h3>
                     <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', margin: '6px 0 8px' }}>

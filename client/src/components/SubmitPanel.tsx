@@ -34,8 +34,7 @@ export function SubmitPanel({ scenario, mentionedWeapons, onSolved }: { scenario
   }
 
   const submit = () => {
-  const en = useLocale()
-    if (cooldown > 0) return
+  if (cooldown > 0) return
   if (selectedSuspectIndex < 0) { setResult(en.submit.pickSuspect); return }
   if (revealedWeapons.length === 0) { setResult(en.submit.notEnoughEvidence); return }
   if (selectedWeaponIndex < 0) { setResult(en.submit.pickWeapon); return }
@@ -48,7 +47,11 @@ export function SubmitPanel({ scenario, mentionedWeapons, onSolved }: { scenario
     if (okSuspect && okWeapon) {
       const motive = scenario?.truth?.motiveCore || (suspect?.motive || '')
       const contras: string[] = Array.isArray(scenario?.truth?.keyContradictions) ? scenario.truth.keyContradictions : []
-  setResult(`${en.submit.correctPrefix} ${suspect.name} used the ${weapon.name}. Motive: ${motive}${contras.length ? ' | Key contradictions: ' + contras.join('; ') : ''}`)
+      // build localized success message
+  const extras = (en as any).submit_extras || {}
+  let msg = `${en.submit.correctPrefix} ${suspect.name} ${extras.usedThe || 'used the'} ${weapon.name}. ${extras.motiveLabel || 'Motive:'} ${motive}`
+  if (contras.length) msg += ` ${extras.keyContradictionsLabel || 'Key contradictions:'} ${contras.join('; ')}`
+      setResult(msg)
       if (onSolved) onSolved()
     } else {
   setResult(en.submit.wrong)

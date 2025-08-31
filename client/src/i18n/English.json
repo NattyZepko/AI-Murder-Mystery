@@ -96,6 +96,11 @@
     "tryIn": "Try in {s}s",
     "submit": "Submit"
   },
+  "submit_extras": {
+    "usedThe": "used the",
+    "motiveLabel": "Motive:",
+    "keyContradictionsLabel": "Key contradictions:"
+  },
   "main": {
     "title": "Murder Mystery",
     "intro1": "Generate a scenario and inspect suspects, relationships, and witnessed events. (It might take a minute)",
@@ -132,6 +137,10 @@
       "Crime scene GPS recalculating… please make a U-turn…",
       "Suspect fled in clown car. Counting how many got out…"
     ]
+  ,
+  "congratulations": "Congratulations!",
+  "solvedIn": "You solved the mystery in",
+  "solved": "You solved the mystery."
   },
   "labels": {
     "gender_male": "male",

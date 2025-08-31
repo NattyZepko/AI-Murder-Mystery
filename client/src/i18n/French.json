@@ -96,6 +96,11 @@
     "tryIn": "Réessayez dans {s}s",
     "submit": "Soumettre"
   },
+  "submit_extras": {
+    "usedThe": "a utilisé",
+    "motiveLabel": "Motif:",
+    "keyContradictionsLabel": "Contradictions clés:"
+  },
   "main": {
     "title": "Meurtre Mystère",
     "intro1": "Générez un scénario et inspectez les suspects, relations et événements observés.",
@@ -132,6 +137,10 @@
       "Le GPS recalcule... faites demi-tour...",
       "Le suspect s'est enfui en voiture de clown. On compte combien sont sortis..."
     ]
+  ,
+  "congratulations": "Félicitations !",
+  "solvedIn": "Vous avez résolu l'enquête en",
+  "solved": "Vous avez résolu l'enquête."
   },
   "labels": {
     "gender_male": "homme",
