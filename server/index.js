@@ -16,6 +16,17 @@ app.get('/api/health', (req, res) => {
   res.json({ ok: true, ts: Date.now() });
 });
 
+// List available AI locale languages
+app.get('/api/ai-languages', (req, res) => {
+  try {
+    const { availableAiLanguages } = require('../src/i18n');
+    const langs = availableAiLanguages();
+    res.json({ languages: langs });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to list AI languages' });
+  }
+});
+
 app.post('/api/scenario', async (req, res) => {
   try {
     const { language } = req.body || {};

@@ -4,18 +4,8 @@ const { COLOR } = require('./ui');
 const { KEYS, TEXT } = require('./constants');
 const fs = require('fs');
 const path = require('path');
-
-function loadAiTemplate(language = 'English') {
-  try {
-    const name = String(language || 'English');
-    const file = path.resolve(__dirname, 'locales', 'ai', `${name}.json`);
-    if (fs.existsSync(file)) {
-      const txt = fs.readFileSync(file, 'utf8');
-      return JSON.parse(txt);
-    }
-  } catch (_) {}
-  return null;
-}
+const { loadAiTemplate: loadAiTemplateFromI18n } = require('./i18n');
+function loadAiTemplate(language = 'English') { return loadAiTemplateFromI18n(language); }
 
 function createSuspectInteractor({ rl, scenario, lockInput, unlockInput, discoveredClues, mentionedWeapons, logUser, logAI, chatWithAI, language } = {}) {
   return function interactWithSuspect(suspect) {

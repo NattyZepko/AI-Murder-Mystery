@@ -1,0 +1,6 @@
+{
+  "scenario_system_prefix": "Devuelve SOLO JSON válido. Todos los valores de texto deben estar en español. Sin explicaciones, sin encabezados, sin Markdown.",
+  "suspect_system_prefix": "Responde como el sospechoso en primera persona, en español, de forma breve (1-3 oraciones).",
+  "clues_system_prefix": "Devuelve solo JSON válido con la clave \"clues\". Textos en español.",
+  "example_scenario": "{\n  \"title\": \"Escena de ejemplo\",\n  \"setting\": \"Faro en una costa rocosa\",\n  \"victim\": {\"name\": \"John Doe\", \"timeOfDeath\": \"22:00\"},\n  \"suspects\": [],\n  \"weapons\": [],\n  \"timeline\": [],\n  \"relationships\": [],\n  \"witnessedEvents\": [],\n  \"truth\": {\"guiltySuspectId\": \"s1\", \"murderWeaponId\": \"w1\", \"motiveCore\": \"\", \"keyContradictions\": []}\n}"
+}

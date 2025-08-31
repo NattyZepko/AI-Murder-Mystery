@@ -12,6 +12,32 @@ try {
 const http = require('http');
 const url = require('url');
 
+// Local mock mode for offline testing: set USE_LOCAL_MOCK=1 to enable.
+if (process.env.USE_LOCAL_MOCK === '1') {
+  // Export a very small mock that returns the example_scenario from language templates when possible.
+  module.exports = {
+    chatWithAI: async ({ system, messages } = {}) => {
+      try {
+        // Try to detect language from system instructions
+        const sys = String(system || '') + ' ' + (messages && messages[0] && messages[0].content ? messages[0].content : '');
+        let lang = 'English';
+        if (/עברית|עברית/i.test(sys) || /Hebrew/i.test(sys)) lang = 'Hebrew';
+        if (/francais|français|French/i.test(sys)) lang = 'French';
+        const file = path.resolve(__dirname, 'locales', 'ai', `${lang}.json`);
+        if (fs.existsSync(file)) {
+          const txt = fs.readFileSync(file, 'utf8');
+          const j = JSON.parse(txt);
+          const example = j.example_scenario || '';
+          return { message: { role: 'assistant', content: example } };
+        }
+      } catch (_) {}
+      return { message: { role: 'assistant', content: '{"clues": []}' } };
+    },
+    chatWithOllama: async () => { throw new Error('Mock only'); },
+    AI_PROVIDER: 'mock'
+  };
+}
+
 // Provider selection. Default to Google (Gemini) per request.
 const AI_PROVIDER = (process.env.AI_PROVIDER || 'google').toLowerCase();
 

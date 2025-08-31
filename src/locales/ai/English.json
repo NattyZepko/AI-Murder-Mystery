@@ -3,4 +3,6 @@
   "scenario_user_prefix": "Generate the scenario content in English only and do not include translations or explanatory text. Output ONLY the JSON object.",
   "suspect_system_prefix": "Produce all suspect replies in English. Do NOT use markdown or code fences; return plain text responses in English. Return names and descriptions in English.",
   "clues_system_prefix": "Return extracted clues in English. Output ONLY valid JSON for the clues array; no markdown or commentary."
+  ,
+  "example_scenario": "{\n  \"title\": \"דוגמה: Lighthouse\",\n  \"setting\": \"A lonely lighthouse on a rocky shore\",\n  \"victim\": {\"name\": \"Jon Doe\", \"timeOfDeath\": \"10:00 PM\"},\n  \"suspects\": [{\"id\": \"s1\", \"name\": \"Alex Reed\", \"gender\": \"male\", \"age\": 30, \"mannerisms\": [], \"quirks\": [], \"catchphrase\": \"\", \"backstory\": \"\", \"relationshipToVictim\": \"neighbor\", \"motive\": \"\", \"alibi\": \"At home\", \"alibiVerifiedBy\": [], \"knowledge\": [], \"contradictions\": [], \"isGuilty\": false, \"persona\": \"calm\"}],\n  \"weapons\": [{\"id\": \"w1\", \"name\": \"Rusty Knife\", \"discoveredHints\": [], \"isMurderWeapon\": false}],\n  \"timeline\": [],\n  \"relationships\": [],\n  \"witnessedEvents\": [],\n  \"truth\": {\"guiltySuspectId\": \"s1\", \"murderWeaponId\": \"w1\", \"motiveCore\": \"\", \"keyContradictions\": []}\n}"
 }

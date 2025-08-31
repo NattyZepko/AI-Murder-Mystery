@@ -1,18 +1,8 @@
 const { chatWithAI } = require('./ai');
 const fs = require('fs');
 const path = require('path');
-
-function loadAiTemplate(language = 'English') {
-  try {
-    const name = String(language || 'English');
-    const file = path.resolve(__dirname, 'locales', 'ai', `${name}.json`);
-    if (fs.existsSync(file)) {
-      const txt = fs.readFileSync(file, 'utf8');
-      return JSON.parse(txt);
-    }
-  } catch (_) {}
-  return null;
-}
+const { loadAiTemplate: loadAiTemplateFromI18n } = require('./i18n');
+function loadAiTemplate(language = 'English') { return loadAiTemplateFromI18n(language); }
 
 // Ask AI to summarize only meaningful clues; returns [{ type, note }]
 async function extractMeaningfulClues({ reply, lastUserText, suspect, scenario, language }) {
@@ -45,12 +35,35 @@ Context:
     let json;
     try {
       json = JSON.parse(payload);
-    } catch (_) {
+    } catch (e) {
+      // Attempt to extract JSON substring
       const first = payload.indexOf('{');
       const last = payload.lastIndexOf('}');
       if (first >= 0 && last > first) {
         const maybe = payload.slice(first, last + 1);
-        json = JSON.parse(maybe);
+        try {
+          json = JSON.parse(maybe);
+        } catch (_) {
+          // Attempt automated repair by asking the model to output STRICT JSON only
+          try {
+            const tpl2 = loadAiTemplate(language) || {};
+            const repairSystem = tpl2.clues_system_prefix
+              ? `${tpl2.clues_system_prefix} Do NOT add any explanations; output ONLY valid JSON.`
+              : `You are a JSON fixer. Output ONLY valid JSON with a top-level \"clues\" array. Do not include markdown or commentary.`;
+            const repairUser = `Here is the assistant's previous reply that failed to parse:\n---\n${String(payload).slice(0, 2000)}\n---\nPlease output only the corrected JSON object now.`;
+            const repairRes = await chatWithAI({ system: repairSystem, messages: [{ role: 'user', content: repairUser }], options: { temperature: 0.0, top_p: 1.0, max_tokens: 600 } });
+            let repaired = String(repairRes.message?.content || '').trim();
+            if (/^```/.test(repaired)) {
+              const firstNl = repaired.indexOf('\n');
+              if (firstNl !== -1) repaired = repaired.slice(firstNl + 1);
+              if (repaired.endsWith('```')) repaired = repaired.slice(0, -3);
+              repaired = repaired.trim();
+            }
+            json = JSON.parse(repaired);
+          } catch (_) {
+            return [];
+          }
+        }
       } else {
         return [];
       }
