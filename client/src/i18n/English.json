@@ -119,6 +119,8 @@
     "noClues": "No clues yet.",
     "weaponsMentioned": "Weapons mentioned",
     "noneYet": "- none yet",
+  "colorizeToggle": "Colorize suspect names and weapons",
+  "showAvatarsToggle": "Show character faces",
     "settingLabel": "Setting:",
     "victimLabel": "Victim:",
     "funnyErrors": [

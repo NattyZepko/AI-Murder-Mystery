@@ -119,6 +119,8 @@
     "noClues": "Aucun indice pour le moment.",
     "weaponsMentioned": "Armes mentionnées",
     "noneYet": "- aucun pour le moment",
+  "colorizeToggle": "Colorer les noms des suspects et les armes",
+  "showAvatarsToggle": "Afficher les visages des personnages",
     "settingLabel": "Cadre:",
     "victimLabel": "Victime:",
     "funnyErrors": [

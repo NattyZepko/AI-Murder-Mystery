@@ -40,6 +40,8 @@ function AppInner() {
   const [debug, setDebug] = React.useState(false);
   const [debugEnabled, setDebugEnabled] = React.useState(false); // easter-egg unlock to reveal debug button
   const [solved, setSolved] = React.useState(false);
+  const [coloringEnabled, setColoringEnabled] = React.useState(true);
+  const [showAvatars, setShowAvatars] = React.useState(true);
   const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
   const [celebrationMethod, setCelebrationMethod] = React.useState<'confetti' | 'fireworks' | 'emoji' | null>(null);
   const [startTime, setStartTime] = React.useState<number | null>(null);
@@ -54,7 +56,11 @@ function AppInner() {
   // --- MEMOS & UTILS ---
   const en = useLocale();
   const { language } = useLanguage();
+  const colorizeToggleLabel = (en.main as any)?.colorizeToggle || 'Colorize';
+  const showAvatarsToggleLabel = (en.main as any)?.showAvatarsToggle || 'Show character faces';
   const isRTL = language === 'Hebrew'
+  const toggleLabelWidth = 180;
+  const toggleLabelStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 6, width: toggleLabelWidth, justifyContent: 'flex-start' };
   const suspectNames = React.useMemo(() => new Set((scenario?.suspects ?? []).map((s: any) => s.name).filter(Boolean)), [scenario]);
   const weaponNames = React.useMemo(() => new Set((scenario?.weapons ?? []).map((w: any) => w.name).filter(Boolean)), [scenario]);
   const weaponKeywordMap = React.useMemo(() => {
@@ -221,7 +227,7 @@ function AppInner() {
   };
 
   const openSuspect = (id: string) => {
-  if (solved) return; // disable opening suspect chats after solved
+  if (solved || thinking) return; // disable opening suspect chats after solved or while waiting for a reply
   setActiveSuspectId(id);
   setMessages(histories[id] || []);
   };
@@ -233,6 +239,8 @@ function AppInner() {
     const system = buildSystemForSuspect(suspect, scenario, language);
     const next: ChatMessage[] = [...messages, { role: 'user' as const, content: text }];
     setMessages(next);
+  // mark that we're waiting for the AI response so the user can't switch suspects
+  setThinking(true);
     try {
       const resp = await chat(system, next, { temperature: 0.7, max_tokens: 180 });
       const reply = resp?.message?.content || '(no response)';
@@ -347,14 +355,19 @@ function AppInner() {
                             textAlign: 'left',
                             background: activeSuspectId === s.id ? '#334155' : '#475569',
                             color: '#f3f4f6',
-                            cursor: solved ? 'not-allowed' : 'pointer',
+                            cursor: (solved || thinking) ? 'not-allowed' : 'pointer',
                             transition: 'background 0.2s',
                           }}
-                          disabled={solved}
-                          title={solved ? 'Chat disabled after solving' : undefined}
+                          disabled={solved || thinking}
+                          title={solved ? 'Chat disabled after solving' : (thinking ? 'Waiting for reply — cannot switch suspect' : undefined)}
                         >
                           <div style={{ display: 'grid', gridTemplateColumns: '36px 8px 1fr', alignItems: 'center', columnGap: 8, minHeight: 36 }}>
-                            <AvatarFace gender={s.gender} age={s.age} persona={s.persona || s.mannerisms?.join(' ')} size={36} accentColor={suspectColorById[s.id]} />
+                            {showAvatars ? (
+                              <AvatarFace gender={s.gender} age={s.age} persona={s.persona || s.mannerisms?.join(' ')} size={36} accentColor={suspectColorById[s.id]} />
+                            ) : (
+                              // invisible spacer to preserve layout when avatars are hidden
+                              <div aria-hidden="true" style={{ width: 36, height: 36, minWidth: 36, minHeight: 36, display: 'block' }} />
+                            )}
                             <div style={{ width: 8, height: 8, borderRadius: '50%', background: suspectColorById[s.id] }} />
                             <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, minWidth: 0, flexWrap: 'wrap' }}>
                               <strong style={{ wordBreak: 'break-word' }}>{s.name}</strong>
@@ -370,6 +383,21 @@ function AppInner() {
                       </li>
                     ))}
                   </ul>
+                  {/* show the color toggle only when a scenario is active and not yet solved */}
+                  {scenario && !solved && (
+                    <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, width: '100%' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center', width: '100%' }}>
+                        <label style={toggleLabelStyle}>
+                          <input type="checkbox" checked={coloringEnabled} onChange={(e) => setColoringEnabled(e.target.checked)} />
+                          <span style={{ fontSize: 12 }}>{colorizeToggleLabel}</span>
+                        </label>
+                        <label style={toggleLabelStyle}>
+                          <input type="checkbox" checked={showAvatars} onChange={(e) => setShowAvatars(e.target.checked)} />
+                          <span style={{ fontSize: 12 }}>{showAvatarsToggleLabel}</span>
+                        </label>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div>
                   <h3>{en.main.interrogateTitle}</h3>
@@ -393,7 +421,7 @@ function AppInner() {
                               normalizedSuspectNameToColor[normName] = color;
                             });
                           }
-                          return colorizeText({ text: t, weaponKeywordMap, suspectNameToColor: normalizedSuspectNameToColor, suspectTokenToColor });
+                          return colorizeText({ text: t, weaponKeywordMap, suspectNameToColor: normalizedSuspectNameToColor, suspectTokenToColor, enabled: coloringEnabled });
                         }}
                       />
                     </div>
@@ -438,7 +466,7 @@ function AppInner() {
                             <span>[{c.type}] </span>
                             <span style={{ color: suspectNameToColor[c.subject] || '#dc2626', fontWeight: 600 }}>{c.subject}</span>
                             <span>: </span>
-                            <span dangerouslySetInnerHTML={{ __html: colorizeText({ text: c.note, weaponKeywordMap, suspectNameToColor, suspectTokenToColor }) }} />
+                            <span dangerouslySetInnerHTML={{ __html: colorizeText({ text: c.note, weaponKeywordMap, suspectNameToColor, suspectTokenToColor, enabled: coloringEnabled }) }} />
                           </li>
                         ))}
                       </ul>

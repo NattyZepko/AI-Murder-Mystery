@@ -1,7 +1,8 @@
 export function escapeRe(s: string) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 
 // Use Unicode-aware regex with \p{L} and \p{N} to match tokens in non-Latin scripts.
-export function colorizeText({ text, weaponKeywordMap = {}, suspectNameToColor = {}, suspectTokenToColor = {} }: { text: string; weaponKeywordMap?: Record<string, string[]>; suspectNameToColor?: Record<string, string>; suspectTokenToColor?: Record<string, string> }) {
+export function colorizeText({ text, weaponKeywordMap = {}, suspectNameToColor = {}, suspectTokenToColor = {}, enabled = true }: { text: string; weaponKeywordMap?: Record<string, string[]>; suspectNameToColor?: Record<string, string>; suspectTokenToColor?: Record<string, string>; enabled?: boolean }) {
+  if (!enabled) return text;
   let out = text;
   const outline = 'text-shadow: -0.5px -0.5px 0 #000000ff, 0.5px -0.5px 0 #000000ff, -0.5px 0.5px 0 #000000ff, 0.5px 0.5px 0 #000000ff;';
   const weaponNames = Object.keys(weaponKeywordMap).filter(Boolean);
@@ -17,7 +18,10 @@ export function colorizeText({ text, weaponKeywordMap = {}, suspectNameToColor =
   }
   const suspectNames = Object.keys(suspectNameToColor).filter(Boolean);
   if (suspectNames.length) {
-    const pattern = new RegExp(`(${suspectNames.map(escapeRe).sort((a, b) => b.length - a.length).join('|')})`, 'giu');
+    // Match suspect names only when they appear as whole tokens (not as substrings of other words).
+    // Use Unicode-aware check: ensure the match isn't preceded/followed by a letter or number.
+    const namesPattern = suspectNames.map(escapeRe).sort((a, b) => b.length - a.length).join('|');
+    const pattern = new RegExp(`(?<![\\p{L}\\p{N}])(${namesPattern})(?![\\p{L}\\p{N}])`, 'giu');
     out = out.replace(pattern, (m) => {
       const matchName = suspectNames.find(n => n.toLowerCase() === m.toLowerCase());
       const color = matchName ? suspectNameToColor[matchName] : '#dc2626';
@@ -26,7 +30,9 @@ export function colorizeText({ text, weaponKeywordMap = {}, suspectNameToColor =
   }
   const suspectTokens = Object.keys(suspectTokenToColor).filter(Boolean);
   if (suspectTokens.length) {
-    const pattern = new RegExp(`(${suspectTokens.map(escapeRe).sort((a, b) => b.length - a.length).join('|')})`, 'giu');
+    // Likewise, match suspect tokens only as standalone tokens to avoid substring matches.
+    const tokensPattern = suspectTokens.map(escapeRe).sort((a, b) => b.length - a.length).join('|');
+    const pattern = new RegExp(`(?<![\\p{L}\\p{N}])(${tokensPattern})(?![\\p{L}\\p{N}])`, 'giu');
     out = out.replace(pattern, (m) => {
       const key = m.toLowerCase();
       const color = suspectTokenToColor[key] || '#dc2626';

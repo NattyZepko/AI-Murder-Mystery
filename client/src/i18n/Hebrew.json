@@ -119,6 +119,8 @@
     "noClues": "אין רמזים עדיין.",
     "weaponsMentioned": "נשקים שהוזכרו",
     "noneYet": "- עדיין אין",
+  "colorizeToggle": "צבעו שמות של חשודים וכלי נשק",
+  "showAvatarsToggle": "הצג תמונת פני החשוד",
     "settingLabel": "הסביבה:",
     "victimLabel": "קורבן:",
     "funnyErrors": [

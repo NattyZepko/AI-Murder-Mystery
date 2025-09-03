@@ -137,7 +137,9 @@ function recoverJsonByTrimming(content) {
 }
 
 // Parse newline-delimited JSON objects (JSONL) where AI may have emitted one object per line
-const { attemptQuickFixJsonString, recoverJsonByTrimming, parseJsonLines, parseJsonContent, fetchJsonWithRetries: fetchJsonWithRetriesUtil } = require('./utils/jsonRepair');
+// Note: attemptQuickFixJsonString, recoverJsonByTrimming and parseJsonContent are implemented
+// locally in this file; only import helpers we don't define here.
+const { parseJsonLines, fetchJsonWithRetries: fetchJsonWithRetriesUtil } = require('./utils/jsonRepair');
 
 // Post-process and normalize assembled scenario
 function postProcessScenario(scenario) {
