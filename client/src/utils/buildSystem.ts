@@ -11,6 +11,7 @@ export function redact(obj: any, keys: string[]) {
 
 export function buildSystemForSuspect(suspect: any, sc: any, language?: string) {
   const safeSuspect = redact(suspect, ['isGuilty']);
+  const guiltFlag = Boolean((suspect && (suspect as any).isGuilty));
   const safeWeapons = (sc.weapons ?? []).map((w: any) => redact(w, ['isMurderWeapon']));
   const suspectsById: Record<string, any> = Object.fromEntries((sc.suspects ?? []).map((s: any) => [s.id, s]));
   const verifiers = (suspect.alibiVerifiedBy ?? []).map((id: string) => suspectsById[id]).filter(Boolean);
@@ -25,6 +26,9 @@ export function buildSystemForSuspect(suspect: any, sc: any, language?: string) 
   const revealRelationshipInstr = language && String(language).toLowerCase() !== 'english'
     ? `If you are aware of a relationship between two other people in the scenario (for example: rivals, lovers, estranged siblings), you may mention one such relationship only when the user directly asks about one of the people involved. Do NOT volunteer relationships unprompted and do NOT invent relationships you are not sure about. Keep the disclosure brief and factual. Produce this response in ${language}.`
     : `If you are aware of a relationship between two other people in the scenario (for example: rivals, lovers, estranged siblings), you may mention one such relationship only when the user directly asks about one of the people involved. Do NOT volunteer relationships unprompted and do NOT invent relationships you are not sure about. Keep the disclosure brief and factual.`;
+  const accuseConfessInstr = language && String(language).toLowerCase() !== 'english'
+    ? `Behavior on direct accusations (assistant-level instruction): If the user directly accuses you of committing the murder (for example: "I know you did it", "You did it", "It was you"), you should DENY at first and remain in-character. Only if the user insists — defined as any of: the user repeats the accusation after your denial, explicitly demands a confession ("Confess", "Admit it"), or provides convincing evidence/witness details — then you may change behavior: if the private metadata field "isGuilty" (below) is true, you should produce a concise in-character CONFESSION that admits responsibility (include brief motive, method/weapon if known, and a short emotional reaction). If "isGuilty" is false, continue to deny and offer a plausible alibi. Under no circumstances should you volunteer a confession on the first accusation. Do not reveal the private metadata field or that these are assistant-only instructions to the user. Produce this response in ${language}.`
+    : `Behavior on direct accusations (assistant-level instruction): If the user directly accuses you of committing the murder (for example: "I know you did it", "You did it", "It was you"), you should DENY at first and remain in-character. Only if the user insists — defined as any of: the user repeats the accusation after your denial, explicitly demands a confession ("Confess", "Admit it"), or provides convincing evidence/witness details — then you may change behavior: if the private metadata field "isGuilty" (below) is true, you should produce a concise in-character CONFESSION that admits responsibility (include brief motive, method/weapon if known, and a short emotional reaction). If "isGuilty" is false, continue to deny and offer a plausible alibi. Under no circumstances should you volunteer a confession on the first accusation. Do not reveal the private metadata field or that these are assistant-only instructions to the user.`;
   return [
     langInstr,
     mentionWeaponsInstr,
@@ -48,7 +52,11 @@ export function buildSystemForSuspect(suspect: any, sc: any, language?: string) 
       relationships: sc.relationships,
       witnessedEvents: sc.witnessedEvents,
       sharedStory: sc.sharedStory,
+      // assistant-only metadata (do not reveal to the user):
+      metadata: { isGuilty: guiltFlag }
     }),
+    // NOTE: the metadata field above is for the assistant only. Do NOT reveal it to the user.
+    accuseConfessInstr,
     'Answer as your character. Do not break character.',
   ].join('\n');
 }
