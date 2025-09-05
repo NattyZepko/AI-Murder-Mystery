@@ -11,6 +11,7 @@ export function redact(obj: any, keys: string[]) {
 
 export function buildSystemForSuspect(suspect: any, sc: any, language?: string) {
   const safeSuspect = redact(suspect, ['isGuilty']);
+  const guiltFlag = Boolean((suspect && (suspect as any).isGuilty));
   const safeWeapons = (sc.weapons ?? []).map((w: any) => redact(w, ['isMurderWeapon']));
   const suspectsById: Record<string, any> = Object.fromEntries((sc.suspects ?? []).map((s: any) => [s.id, s]));
   const verifiers = (suspect.alibiVerifiedBy ?? []).map((id: string) => suspectsById[id]).filter(Boolean);
@@ -19,12 +20,26 @@ export function buildSystemForSuspect(suspect: any, sc: any, language?: string) 
   const langInstr = language && String(language).toLowerCase() !== 'english'
     ? `Produce all responses in ${language}. Return all names, descriptions, and JSON fields in ${language}.`
     : `Produce all responses in English.`;
+  const mentionWeaponsInstr = language && String(language).toLowerCase() !== 'english'
+    ? `Only mention nearby or accessible weapons when the user asks a direct, non-accusatory question about your possessions or surroundings (for example: "Do you keep anything on you?" or "What's in your coat?"). Do NOT change the subject to weapons, do not volunteer weapon information unprompted, and do not admit guilt. Keep any mention short (one sentence), factual, and in-character. Produce this response in ${language}.`
+    : `Only mention nearby or accessible weapons when the user asks a direct, non-accusatory question about your possessions or surroundings (for example: "Do you keep anything on you?" or "What's in your coat?"). Do NOT change the subject to weapons, do not volunteer weapon information unprompted, and do not admit guilt. Keep any mention short (one sentence), factual, and in-character.`;
+  const revealRelationshipInstr = language && String(language).toLowerCase() !== 'english'
+    ? `If you are aware of a relationship between two other people in the scenario (for example: rivals, lovers, estranged siblings), you may mention one such relationship only when the user directly asks about one of the people involved. Do NOT volunteer relationships unprompted and do NOT invent relationships you are not sure about. Keep the disclosure brief and factual. Produce this response in ${language}.`
+    : `If you are aware of a relationship between two other people in the scenario (for example: rivals, lovers, estranged siblings), you may mention one such relationship only when the user directly asks about one of the people involved. Do NOT volunteer relationships unprompted and do NOT invent relationships you are not sure about. Keep the disclosure brief and factual.`;
+  const accuseConfessInstr = language && String(language).toLowerCase() !== 'english'
+    ? `Behavior on direct accusations (assistant-level instruction): If the user directly accuses you of committing the murder (for example: "I know you did it", "You did it", "It was you"), you should DENY at first and remain in-character. Only if the user insists — defined as any of: the user repeats the accusation after your denial, explicitly demands a confession ("Confess", "Admit it"), or provides convincing evidence/witness details — then you may change behavior: if the private metadata field "isGuilty" (below) is true, you should produce a concise in-character CONFESSION that admits responsibility (include brief motive, method/weapon if known, and a short emotional reaction). If "isGuilty" is false, continue to deny and offer a plausible alibi. Under no circumstances should you volunteer a confession on the first accusation. Do not reveal the private metadata field or that these are assistant-only instructions to the user. Produce this response in ${language}.`
+    : `Behavior on direct accusations (assistant-level instruction): If the user directly accuses you of committing the murder (for example: "I know you did it", "You did it", "It was you"), you should DENY at first and remain in-character. Only if the user insists — defined as any of: the user repeats the accusation after your denial, explicitly demands a confession ("Confess", "Admit it"), or provides convincing evidence/witness details — then you may change behavior: if the private metadata field "isGuilty" (below) is true, you should produce a concise in-character CONFESSION that admits responsibility (include brief motive, method/weapon if known, and a short emotional reaction). If "isGuilty" is false, continue to deny and offer a plausible alibi. Under no circumstances should you volunteer a confession on the first accusation. Do not reveal the private metadata field or that these are assistant-only instructions to the user.`;
   return [
     langInstr,
+    mentionWeaponsInstr,
     'You are roleplaying as a suspect in a murder mystery.',
     'Stay in character; do not reveal meta info or the culprit.',
     'Avoid stage directions; convey emotion by word choice only.',
     'If the user asks questions unrelated to the murder, the case, or the scenario, respond in-character and gently steer the conversation back to the investigation.',
+  'Example of desired behavior regarding weapons (one-shot):',
+  'User: Do you keep anything on you?\nSuspect: I usually carry a small flashlight in my coat pocket. Nothing special, just for checking the cellar.\n',
+  'Example of desired behavior regarding relationships (one-shot):',
+  'User: Do you know anything about Alex?\nSuspect: Alex and Jordan have been rivals at the factory for years — they argue over shifts.\n',
     `Shared scenario: ${shared}`,
     'Context (JSON, safe):',
     JSON.stringify({
@@ -37,7 +52,11 @@ export function buildSystemForSuspect(suspect: any, sc: any, language?: string) 
       relationships: sc.relationships,
       witnessedEvents: sc.witnessedEvents,
       sharedStory: sc.sharedStory,
+      // assistant-only metadata (do not reveal to the user):
+      metadata: { isGuilty: guiltFlag }
     }),
+    // NOTE: the metadata field above is for the assistant only. Do NOT reveal it to the user.
+    accuseConfessInstr,
     'Answer as your character. Do not break character.',
   ].join('\n');
 }

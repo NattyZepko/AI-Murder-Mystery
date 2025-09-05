@@ -48,20 +48,22 @@ function hairColor(seed: number): string {
   return pick(palette, seed + 13)
 }
 
-function hairStyle(gender?: string, persona?: string, seed = 0): 'short'|'long'|'bangs'|'bun'|'ponytail'|'curly'|'shaved'|'mohawk' {
+function hairStyle(gender?: string, persona?: string, seed = 0): 'short'|'long'|'bangs'|'bun'|'ponytail'|'curly'|'shaved'|'mohawk'|'bob'|'asym'|'wavy'|'topknot'|'pompadour'|'side'|'slick' {
   const g = (gender || '').toLowerCase()
   const p = (persona || '').toLowerCase()
   if (g === 'female') {
-    if (/icy|arrogant|executive/.test(p)) return 'bun'
-    if (/funny|bubbly|artist|free/.test(p)) return 'bangs'
-    const opts: any = ['long','bangs','ponytail','curly']
+    // prefer styles that cover the crown for many female personas
+    if (/icy|arrogant|executive/.test(p)) return 'topknot'
+    if (/funny|bubbly|artist|free/.test(p)) return pick(['bangs','asym','wavy'], subSeed(seed, 7)) as any
+    const opts: any = ['long','bangs','ponytail','curly','bob','asym','wavy']
     return pick(opts, subSeed(seed, 3)) as any
   }
   if (g === 'male') {
-    const opts: any = ['short','short','bangs','curly','mohawk','shaved']
+    // more variety for males that sometimes extend beyond the round head
+    const opts: any = ['short','short','side','pompadour','slick','curly','mohawk','shaved']
     return pick(opts, subSeed(seed, 4)) as any
   }
-  return pick(['short','long','bangs','curly'], subSeed(seed, 5)) as any
+  return pick(['short','long','bangs','curly','bob','asym'], subSeed(seed, 5)) as any
 }
 
 export function AvatarFace({ gender, age, persona, size = 36, accentColor }: Props) {
@@ -72,6 +74,8 @@ export function AvatarFace({ gender, age, persona, size = 36, accentColor }: Pro
   const style = hairStyle(gender, persona, seed)
   const stroke = '#222'
   const eyeY = 12
+  const hairLift = 2 // raise hair/hats above forehead a bit
+  const hatLift = 3
   const eyeDX = 5 + (subSeed(seed, 7) % 3) // 5–7
   const baseEye = 1.3 + ((subSeed(seed, 9) % 10) / 10) // 1.3–2.2
   const eyeR = clamp(baseEye + ((gender || '').toLowerCase() === 'female' ? 0.2 : 0), 1.2, 2.4)
@@ -103,12 +107,19 @@ export function AvatarFace({ gender, age, persona, size = 36, accentColor }: Pro
   // Hair shapes
   const hairPath = (() => {
     if (style === 'bun') return `M 4 8 C 8 2, 16 2, 20 8 L 20 9 C 18 6, 6 6, 4 9 Z M 9 3 A 3 3 0 1 0 15 3 A 3 3 0 1 0 9 3 Z`
-    if (style === 'long') return `M 4 10 C 6 3, 18 3, 20 10 L 20 20 C 16 22, 8 22, 4 20 Z`
+    if (style === 'topknot') return `M 6 6 C 9 2, 15 2, 18 6 L 18 9 C 16 7, 8 7, 6 9 Z M 11 3 A 2 2 0 1 0 13 3 A 2 2 0 1 0 11 3 Z`
+    if (style === 'long') return `M 3 10 C 6 2, 18 2, 21 10 L 21 22 C 16 24, 8 24, 3 22 Z` // longer, extends past head
+    if (style === 'bob') return `M 3 9 C 6 4, 18 4, 21 9 L 21 13 C 18 15, 6 15, 3 13 Z` // boxy bob that extends horizontally
     if (style === 'bangs') return `M 4 8 C 8 4, 16 4, 20 8 L 20 10 C 16 8, 8 8, 4 10 Z`
-    if (style === 'ponytail') return `M 4 8 C 8 3, 16 3, 20 8 L 20 9 C 17 7, 7 7, 4 9 Z M 18 7 C 21 9, 21 14, 18 16`
-    if (style === 'curly') return `M 4 8 C 6 4, 9 4, 11 7 C 13 4, 16 4, 20 8 L 20 10 C 16 8, 8 8, 4 10 Z`
+    if (style === 'asym') return `M 2 8 C 7 3, 16 3, 20 9 L 20 14 C 16 16, 7 14, 2 12 Z` // asymmetric, leans left
+    if (style === 'ponytail') return `M 4 8 C 8 3, 16 3, 20 8 L 20 9 C 17 7, 7 7, 4 9 Z M 18 7 C 22 9, 23 16, 18 18` // longer ponytail
+    if (style === 'curly') return `M 4 8 C 6 4, 9 4, 11 7 C 13 4, 16 4, 20 8 L 20 12 C 16 14, 8 14, 4 12 Z`
+    if (style === 'wavy') return `M 3 9 C 7 4, 11 6, 13 8 C 15 6, 19 4, 21 9 L 21 14 C 18 16, 10 16, 3 14 Z`
     if (style === 'shaved') return `M 4 8 C 8 6, 16 6, 20 8 L 20 8.5 C 16 7.5, 8 7.5, 4 8.5 Z`
-    if (style === 'mohawk') return `M 4 8 C 8 4, 16 4, 20 8 L 20 9 C 16 7, 8 7, 4 9 Z M 11.5 2 L 12.5 2 L 12.5 10 L 11.5 10 Z`
+    if (style === 'mohawk') return `M 4 8 C 8 4, 16 4, 20 8 L 20 9 C 16 7, 8 7, 4 9 Z M 11.5 1.5 L 12.5 1.5 L 12.5 10.5 L 11.5 10.5 Z`
+    if (style === 'pompadour') return `M 2 7 C 8 2, 16 1, 22 7 L 22 10 C 16 6, 8 6, 2 10 Z` // high-volume front
+    if (style === 'side') return `M 2 8 C 6 3, 14 2, 20 9 L 20 12 C 16 11, 8 11, 2 12 Z` // side-swept that extends
+    if (style === 'slick') return `M 3 7 C 8 3, 16 3, 21 7 L 21 9 C 16 7, 8 7, 3 9 Z` // slicked back, low profile
     return `M 4 8 C 8 4, 16 4, 20 8 L 20 9 C 16 7, 8 7, 4 9 Z`
   })()
   // Hair fringe/overlay drawn in front so hair is clearly visible
@@ -118,14 +129,37 @@ export function AvatarFace({ gender, age, persona, size = 36, accentColor }: Pro
     if (style === 'ponytail') return `M 6.5 9 C 9 8, 15 8, 17.5 9 L 17.5 9.8 C 15 9, 9 9, 6.5 9.8 Z`
     if (style === 'curly') return `M 6.2 9 C 8 8, 10 8.2, 12 8.8 C 14 8.2, 16 8, 17.8 9 L 17.8 10 C 16 9.4, 8 9.4, 6.2 10 Z`
     if (style === 'bun') return `M 7 8.6 C 10 7.8, 14 7.8, 17 8.6 L 17 9.4 C 14 8.8, 10 8.8, 7 9.4 Z`
+    if (style === 'bob') return `M 6 10 C 9 9, 15 9, 18 10 L 18 11 C 15 10, 9 10, 6 11 Z`
+    if (style === 'asym') return `M 5.5 9.2 C 8 7.5, 14 7.5, 17.5 9.2 L 17.5 10 C 14 9, 8 9, 5.5 10 Z`
+    if (style === 'wavy') return `M 6 9 C 9 8, 13 8.2, 16 9 L 16 10 C 13 9.5, 9 9.5, 6 10 Z`
+    if (style === 'topknot') return `M 10.5 3.2 A 1.6 1.6 0 1 0 13.2 3.2 A 1.6 1.6 0 1 0 10.5 3.2 Z`
+    if (style === 'pompadour') return `M 5 7 C 9 4, 15 3, 19 7 L 19 8 C 15 6, 9 6, 5 8 Z`
+    if (style === 'side') return `M 4 8 C 8 4, 14 3, 20 9 L 20 9.8 C 14 8, 8 8, 4 9 Z`
+    if (style === 'slick') return `M 5.5 7.5 C 9 5, 15 5, 18.5 7.5 L 18.5 8 C 15 6.5, 9 6.5, 5.5 8 Z`
     return ''
+  })()
+
+  const female = (gender || '').toLowerCase() === 'female'
+  const male = (gender || '').toLowerCase() === 'male'
+
+  // Hair that covers the crown/top of the head for females (drawn after head)
+  const hairTop = (() => {
+    if (!female) return ''
+    // Different top shapes depending on style to match expected silhouette
+    if (style === 'bun') return `M 6 6 C 9 3, 15 3, 18 6 L 18 9 C 15 7, 9 7, 6 9 Z`
+    if (style === 'topknot') return `M 7 5 C 10 3, 14 3, 17 5 L 17 7 C 14 6, 10 6, 7 7 Z`
+    if (style === 'long') return `M 5 7 C 8 4, 16 4, 19 7 L 19 10 C 16 8, 8 8, 5 10 Z`
+    if (style === 'bangs') return `M 4 8 C 8 5, 16 5, 20 8 L 20 10 C 16 8, 8 8, 4 10 Z`
+    if (style === 'ponytail') return `M 5 7 C 8 4, 16 4, 19 7 L 19 9 C 16 7, 8 7, 5 9 Z`
+    if (style === 'curly') return `M 5 7 C 8 4, 10 5, 12 7 C 14 5, 16 4, 19 7 L 19 9 C 16 7, 8 7, 5 9 Z`
+    if (style === 'bob') return `M 4.5 7.8 C 8 5, 16 5, 19.5 7.8 L 19.5 9.2 C 16 8, 8 8, 4.5 9.2 Z`
+    if (style === 'asym') return `M 3.5 7.8 C 7 4.8, 15 4.8, 19.5 8.5 L 19.5 10 C 15 9, 7 9, 3.5 10 Z`
+    if (style === 'wavy') return `M 4.5 7.8 C 7.5 5, 12 6, 15 7.5 L 15 9.5 C 12 8.8, 7.5 8.8, 4.5 9.5 Z`
+    return `M 5 7 C 8 4, 16 4, 19 7 L 19 9 C 16 7, 8 7, 5 9 Z`
   })()
 
   // Slight face outline shade varies by age
   const strokeWidth = age && age > 60 ? 1.2 : 1
-
-  const female = (gender || '').toLowerCase() === 'female'
-  const male = (gender || '').toLowerCase() === 'male'
   // Eyelashes for feminine look
   const lashes = female ? [
     `M ${12-eyeDX-1.5} ${eyeY-1.5} L ${12-eyeDX-2.5} ${eyeY-2.5}`,
@@ -154,17 +188,20 @@ export function AvatarFace({ gender, age, persona, size = 36, accentColor }: Pro
       aria-hidden="true"
       style={{ display: 'block', width: w, height: h, minWidth: w, minHeight: h, flex: '0 0 auto' }}
     >
-      {/* Clothing (shoulders) tinted by suspect color */}
-      <path d={`M 2 24 L 22 24 L 20 18 C 16 17 8 17 4 18 Z`} fill={cloth} opacity={0.9} />
-      {/* Hair behind */}
-      <path d={hairPath} fill={hair} />
-      {/* Head */}
-      <circle cx={12} cy={12} r={9} fill={skin} stroke={stroke} strokeWidth={strokeWidth} />
+  {/* Clothing (shoulders) tinted by suspect color */}
+  <path d={`M 2 24 L 22 24 L 20 18 C 16 17 8 17 4 18 Z`} fill={cloth} opacity={0.9} />
+  {/* Hair behind: draw slightly above so it sits on top of shoulders but behind the face */}
+  <path d={hairPath} fill={hair} transform={`translate(0, -${hairLift})`} />
+  {/* Head */}
+  <circle cx={12} cy={12} r={9} fill={skin} stroke={stroke} strokeWidth={strokeWidth} />
+  {/* Hair top (female) - drawn after head so crown is covered when no hat */}
+  {hairTop && !hasHat && <path d={hairTop} fill={hair} transform={`translate(0, -${hairLift})`} />}
   {/* Hair front overlay (for visibility) */}
-  {hairFront && <path d={hairFront} fill={hair} />}
+  {hairFront && <path d={hairFront} fill={hair} transform={`translate(0, -${hairLift})`} />}
       {/* Hat (optional) */}
       {hasHat && (
-        hatStyle === 'cap' ? (
+        <g transform={`translate(0, -${hatLift})`}>
+        {hatStyle === 'cap' ? (
           <>
             <path d={`M 5 7 C 8 4, 16 4, 19 7 L 19 9 C 15 7.5, 9 7.5, 5 9 Z`} fill={cloth} />
             <path d={`M 19 8 C 21 8.5, 22 9, 22.5 10`} stroke={cloth} strokeWidth={1} />
@@ -179,7 +216,8 @@ export function AvatarFace({ gender, age, persona, size = 36, accentColor }: Pro
             <path d={`M 5 7 C 8 4, 16 4, 19 7 L 19 8 C 16 7, 8 7, 5 8 Z`} fill={cloth} />
             <path d={`M 3 9 C 8 8, 16 8, 21 9`} stroke={cloth} strokeWidth={1.2} />
           </>
-        )
+        )}
+        </g>
       )}
       {/* Eyes */}
       <circle cx={12-eyeDX} cy={eyeY} r={eyeR} fill={stroke} />

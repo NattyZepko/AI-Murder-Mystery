@@ -2,7 +2,7 @@ import React from 'react'
 import type { ChatMessage } from '../types'
 import { useLocale } from '../i18n/LocaleProvider'
 
-export function ChatPanel({ title, messages, onSend, thinking, colorize }: { title: string, messages: ChatMessage[], onSend: (text: string) => void, thinking: boolean, colorize?: (text: string) => string }) {
+export function ChatPanel({ title, messages, onSend, thinking, colorize, disabled }: { title: string, messages: ChatMessage[], onSend: (text: string) => void, thinking: boolean, colorize?: (text: string) => string, disabled?: boolean }) {
   const [input, setInput] = React.useState('')
   const listRef = React.useRef<HTMLDivElement | null>(null)
   const en = useLocale()
@@ -40,10 +40,10 @@ export function ChatPanel({ title, messages, onSend, thinking, colorize }: { tit
         ))}
   {thinking && <div style={{ fontStyle: 'italic', color: '#ffffffff' }}>{en.chat.thinking}</div>}
       </div>
-      <form onSubmit={submit} style={{ display: 'flex', gap: 8 }}>
-  <input value={input} onChange={e => setInput(e.target.value)} placeholder={en.chat.placeholder} style={{ flex: 1, padding: '8px 10px', borderRadius: 6, border: '1px solid #ccc' }} />
-  <button type="submit" disabled={thinking} style={{ padding: '8px 12px' }}>{en.chat.send}</button>
-      </form>
+    <form onSubmit={submit} style={{ display: 'flex', gap: 8 }}>
+  <input value={input} onChange={e => setInput(e.target.value)} placeholder={en.chat.placeholder} style={{ flex: 1, padding: '8px 10px', borderRadius: 6, border: '1px solid #ccc' }} disabled={!!disabled} />
+  <button type="submit" disabled={thinking || !!disabled} style={{ padding: '8px 12px' }}>{en.chat.send}</button>
+    </form>
     </div>
   )
 }

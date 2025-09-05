@@ -137,119 +137,9 @@ function recoverJsonByTrimming(content) {
 }
 
 // Parse newline-delimited JSON objects (JSONL) where AI may have emitted one object per line
-function parseJsonLines(content) {
-    if (!content || typeof content !== 'string') return null;
-    const lines = content.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-    const objs = [];
-    for (const line of lines) {
-        // skip lines that are clearly not JSON
-        if (!line.startsWith('{') && !line.startsWith('[')) continue;
-        try {
-            const fixed = attemptQuickFixJsonString(line);
-            const parsed = JSON.parse(fixed);
-            if (parsed && typeof parsed === 'object') objs.push(parsed);
-        } catch (_) {
-            // try trimming line progressively
-            let recovered = null;
-            for (let end = line.length - 1; end > 0; end--) {
-                try {
-                    const attempt = attemptQuickFixJsonString(line.slice(0, end + 1));
-                    const parsed = JSON.parse(attempt);
-                    if (parsed && typeof parsed === 'object') { recovered = parsed; break; }
-                } catch (_) { }
-            }
-            if (recovered) objs.push(recovered);
-        }
-    }
-    return objs.length ? objs : null;
-}
-
-// Helper: call AI and retry/repair when response is malformed JSON
-async function fetchJsonWithRetries({ system, user, options = {}, schemaExample = '', language = 'English', retries = 2, partName = 'part' }) {
-    const call = async (sys, usr, opts) => await chatWithAI({ system: sys, messages: [{ role: 'user', content: usr }], options: opts });
-    let res = await call(system, user, options);
-    let content = String(res.message?.content ?? '').trim();
-    try {
-        // keep a short history of raw AI replies for later diagnostics
-        RECENT_AI_REPLIES.unshift({ partName, ts: Date.now(), content: String(content).slice(0, 20000) });
-        if (RECENT_AI_REPLIES.length > 20) RECENT_AI_REPLIES.length = 20;
-    } catch (_) { }
-    const originalContent = content;
-    const repairHistory = [{ type: 'initial', content: originalContent }];
-    console.log(`fetchJsonWithRetries: received ${partName} raw length=${String(content).length}`);
-    console.log(String(content).slice(0, 1200));
-    // Try a quick local sanitization before asking the model to repair
-    try {
-        const attempt = attemptQuickFixJsonString(content);
-        if (attempt !== content) {
-            repairHistory.push({ type: 'quickfix-before-parse', content: attempt });
-            console.log(`fetchJsonWithRetries: quick-fix changed content for ${partName}, trying parse`);
-            console.log(String(attempt).slice(0, 800));
-        }
-        return parseJsonContent(attempt);
-    } catch (_) { /* fallthrough to full parse/repair */ }
-    // Try parse as JSON lines / concatenated JSON objects
-    try {
-        const jsonl = parseJsonLines(content);
-        if (jsonl && jsonl.length) {
-            console.log(`fetchJsonWithRetries: parsed ${jsonl.length} JSON objects from newline/concat fallback for ${partName}`);
-            return jsonl;
-        }
-    } catch (_) { }
-    try {
-        return parseJsonContent(content);
-    } catch (e) {
-        for (let i = 0; i < retries; i++) {
-            console.log(`fetchJsonWithRetries: repair attempt ${i + 1}/${retries} for ${partName}`);
-            const repairSystem = `You are a JSON fixer. The user requested a specific JSON for the ${partName} of a murder-mystery scenario. Produce ONLY the corrected JSON, nothing else. Keys must match the schema and remain in English; textual VALUES should be in ${language}.`;
-            const repairUser = `The assistant previously replied with the following content which failed to parse as JSON:\n---\n${String(content).slice(0, 4000)}\n---\nPlease return ONLY the corrected JSON that matches this example/schema:\n${schemaExample}`;
-            const repairOpts = Object.assign({}, options, { temperature: 0.0, max_tokens: Math.min(1200, (options.max_tokens || 800)) });
-            const repairRes = await call(repairSystem, repairUser, repairOpts);
-            content = String(repairRes.message?.content ?? '').trim();
-            repairHistory.push({ type: `repair-${i + 1}`, content });
-            console.log(`fetchJsonWithRetries: repair reply length=${String(content).length}`);
-            console.log(String(content).slice(0, 1200));
-            // Try quick fix on repaired content as well
-            try {
-                const attempt2 = attemptQuickFixJsonString(content);
-                return parseJsonContent(attempt2);
-            } catch (_) { /* continue to next repair attempt */ }
-            try { return parseJsonContent(content); } catch (_) { /* continue */ }
-        }
-        // Last-ditch: try quick-fix on the final content before throwing
-        const quick = attemptQuickFixJsonString(content);
-        try { return parseJsonContent(quick); } catch (_) { }
-
-        // Prepare diagnostics: print parse failure details and save a log
-        try {
-            console.error(`\nfetchJsonWithRetries: FAILED to parse ${partName} after ${retries + 1} attempts.`);
-            console.error('--- Parse diagnostics: begin ---');
-            console.error('Original AI reply (truncated to 8000 chars):');
-            console.error(String(originalContent).slice(0, 8000));
-            console.error('\nRepair replies:');
-            repairHistory.forEach((r, idx) => {
-                console.error(`[${idx}] type=${r.type} length=${String(r.content || '').length}`);
-                console.error(String(r.content || '').slice(0, 1600));
-            });
-            console.error('--- Parse diagnostics: end ---\n');
-            // Save diagnostics to samples for later inspection
-            try {
-                const fn = path.resolve(__dirname, '..', 'samples', `bad_ai_response_${partName.replace(/[^a-z0-9_-]/gi, '')}_${Date.now()}.log`);
-                const dump = [];
-                dump.push(`PART: ${partName}`);
-                dump.push(`SCHEMA EXAMPLE: \n${schemaExample}\n`);
-                dump.push('=== ORIGINAL ===');
-                dump.push(originalContent || '');
-                dump.push('\n=== REPAIRS ===');
-                repairHistory.forEach(r => { dump.push(`--- ${r.type} ---`); dump.push(r.content || ''); });
-                fs.writeFileSync(fn, dump.join('\n\n'), 'utf8');
-                console.error('Saved diagnostics to', fn);
-            } catch (_) { /* ignore file write errors */ }
-        } catch (_) { }
-
-        throw new Error(`Failed to parse ${partName} after ${retries + 1} attempts. See terminal and samples/ for diagnostics.`);
-    }
-}
+// Note: attemptQuickFixJsonString, recoverJsonByTrimming and parseJsonContent are implemented
+// locally in this file; only import helpers we don't define here.
+const { parseJsonLines, fetchJsonWithRetries: fetchJsonWithRetriesUtil } = require('./utils/jsonRepair');
 
 // Post-process and normalize assembled scenario
 function postProcessScenario(scenario) {
@@ -423,7 +313,7 @@ async function generateScenarioStep1TitleSettingVictim(language) {
     const example = examples.titleSettingVictim || `{"title":"Night at the Conservatory","setting":"An overgrown glass conservatory after hours","victim":{"name":"Dr. Iris Novak","timeOfDeath":"23:45","location":"central pond"}}`;
     const system = `You are a scenario generator. Output ONLY valid JSON that uses EXACT English keys. Keys MUST be EXACTLY these English keys: title, setting, victim (with name, timeOfDeath, optional location). ${langInstr}`;
     const user = `Return ONLY a single JSON object that matches this example/schema (keys must match EXACTLY): ${example}\nGenerate a concise title, evocative setting, and victim (name, timeOfDeath, optional location).`;
-    const parsed = await fetchJsonWithRetries({ system, user, options: { temperature: 0.05, max_tokens: 700, response_mime_type: 'application/json' }, schemaExample: example, language, retries: 1, partName: 'title/setting/victim' });
+    const parsed = await fetchJsonWithRetriesUtil({ system, user, options: { temperature: 0.05, max_tokens: 700, response_mime_type: 'application/json' }, schemaExample: example, language, retries: 1, partName: 'title/setting/victim', callAI: chatWithAI, recentRepliesArray: RECENT_AI_REPLIES });
     console.log('SCENARIO_STEP1_TITLE_SETTING_VICTIM_PARSED_BEGIN');
     console.log(JSON.stringify(parsed, null, 2));
     console.log('SCENARIO_STEP1_TITLE_SETTING_VICTIM_PARSED_END');
@@ -447,7 +337,7 @@ async function generateScenarioStep2Suspects(language, context) {
     const example = examples.suspects || `[ {"id":"suspect1","name":"Liora Dayan","gender":"female","age":34,"mannerisms":["speaks quickly","answers in short evasive replies"],"quirks":["stutters","word-finding pauses"],"catchphrase":"Honestly!","backstory":"Research assistant.","relationshipToVictim":"colleague","motive":"jealousy","alibi":"in lab","alibiVerifiedBy":["suspect2"],"knowledge":["saw victim with another"],"contradictions":[],"isGuilty":false,"persona":"tense"} ]`;
     const system = `You are a scenario generator. Output ONLY valid JSON (no explanation). Use EXACT English keys for suspects objects: id, name, gender, age, mannerisms, quirks, catchphrase, backstory, relationshipToVictim, motive, alibi, alibiVerifiedBy, knowledge, contradictions, isGuilty, persona. NOTE: For this project we use 'mannerisms' specifically to mean speech-mannerisms (how the suspect speaks: speaking softly, shouting, answering in short evasive replies, interrupting, using a sing-song tone, etc.). We use 'quirks' to mean speech-quirks (stuttering, stammering, echolalia, frequent word-finding pauses, overuse of metaphors/analogies, monotone). Provide examples in those fields where appropriate. IMPORTANT: the field \"alibiVerifiedBy\" MUST be an array of suspect IDs that appear in this same suspects array (for example: [\"suspect1\", \"suspect2\"]). Do NOT include external evidences, freeform strings, or non-suspect identifiers (e.g., \"security footage\" or \"roommate\"). If no other suspect can verify an alibi, set \"alibiVerifiedBy\" to an empty array. Groups of 2 or 3 suspects confirming each other are allowed. Also, suspects MAY mention weapons they noticed nearby in their \"knowledge\" array (use weapon names exactly as they appear in the weapons array). ${langInstr}`;
     const user = `Context:\n${JSON.stringify({ title: context.title, setting: context.setting, victim: context.victim })}\nReturn ONLY a JSON array of 5–7 suspect objects (keys MUST match EXACTLY) matching this example schema: ${example}\nNOTE: For each suspect, the \"alibiVerifiedBy\" value MUST be an array of zero or more suspect IDs from the same array (no external evidence strings). Groups of 2 or 3 mutual verifiers are acceptable.`;
-    const parsed = await fetchJsonWithRetries({ system, user, options: { temperature: 0.05, max_tokens: 1200, response_mime_type: 'application/json' }, schemaExample: example, language, retries: 2, partName: 'suspects' });
+    const parsed = await fetchJsonWithRetriesUtil({ system, user, options: { temperature: 0.05, max_tokens: 1200, response_mime_type: 'application/json' }, schemaExample: example, language, retries: 2, partName: 'suspects', callAI: chatWithAI, recentRepliesArray: RECENT_AI_REPLIES });
     console.log('SCENARIO_STEP2_SUSPECTS_PARSED_BEGIN');
     console.log(JSON.stringify(parsed, null, 2));
     console.log('SCENARIO_STEP2_SUSPECTS_PARSED_END');
@@ -462,7 +352,7 @@ async function generateScenarioStep2Suspects(language, context) {
         const addUser = `Context:
 ${JSON.stringify({ title: context.title, setting: context.setting, victim: context.victim, existingSuspectIds: existingIds })}
 Return ONLY a JSON array of ${missing} suspect objects matching this example/schema: ${example}`;
-        const more = await fetchJsonWithRetries({ system: addSystem, user: addUser, options: { temperature: 0.8, max_tokens: 500, response_mime_type: 'application/json' }, schemaExample: example, language, retries: 2, partName: 'suspects-additional' });
+    const more = await fetchJsonWithRetriesUtil({ system: addSystem, user: addUser, options: { temperature: 0.8, max_tokens: 500, response_mime_type: 'application/json' }, schemaExample: example, language, retries: 2, partName: 'suspects-additional', callAI: chatWithAI, recentRepliesArray: RECENT_AI_REPLIES });
         if (Array.isArray(more) && more.length) {
             // Ensure unique IDs: if collision, append suffix
             const used = new Set(existingIds);
@@ -493,7 +383,7 @@ async function generateScenarioStep3Weapons(language, context) {
     const system = `You are a scenario generator. Output ONLY valid JSON for weapons. Keys MUST be EXACTLY: id, name, discoveredHints, isMurderWeapon, foundOnSuspectId, foundNearSuspectId. IMPORTANT: the name field must be a meaningful, concise noun phrase (e.g., "Glass Shard", "Kitchen Knife", "Statue Base"). Do NOT set name to generic terms like \"weapon\", \"item\", or \"object\". Names should be short (1–3 words) and, where possible, be themed to the setting. ${langInstr}`;
     const user = `Context suspects:\n${JSON.stringify(context.suspects)}\nReturn ONLY a JSON array of 4–6 weapons (keys MUST match EXACTLY) matching this example schema: ${example}\nIMPORTANT: Each weapon.name should be a concise, descriptive noun phrase (1–3 words). Provide realistic discoveredHints (short words or phrases) that can be used to derive better fallback names if needed.`;
     // Attempt initial fetch
-    let parsed = await fetchJsonWithRetries({ system, user, options: { temperature: 0.05, max_tokens: 1000, response_mime_type: 'application/json' }, schemaExample: example, language, retries: 2, partName: 'weapons' });
+    let parsed = await fetchJsonWithRetriesUtil({ system, user, options: { temperature: 0.05, max_tokens: 1000, response_mime_type: 'application/json' }, schemaExample: example, language, retries: 2, partName: 'weapons', callAI: chatWithAI, recentRepliesArray: RECENT_AI_REPLIES });
     console.log('SCENARIO_STEP3_WEAPONS_PARSED_BEGIN');
     console.log(JSON.stringify(parsed, null, 2));
     console.log('SCENARIO_STEP3_WEAPONS_PARSED_END');
@@ -522,7 +412,7 @@ async function generateScenarioStep3Weapons(language, context) {
         const repairSystem = `You are a scenario generator focused on weapon names. Output ONLY a JSON array of weapon objects matching the original schema: id, name, discoveredHints, isMurderWeapon, foundOnSuspectId, foundNearSuspectId. Keep all fields exactly as provided except REPLACE the 'name' fields for entries that were generic (e.g., "weapon", "item", "נשק"). Names MUST be meaningful, concise noun phrases (1-3 words) and MUST NOT be generic. Do NOT change ids or boolean flags. ${langInstr}`;
         const repairUser = `Here are the current weapons JSON (some names are generic):\n${JSON.stringify(parsed, null, 2)}\n\nPlease return the full weapons array again but with improved 'name' values where needed. Keep discoveredHints and other fields intact. Return ONLY the JSON array.`;
         try {
-            const repaired = await fetchJsonWithRetries({ system: repairSystem, user: repairUser, options: { temperature: 0.0, max_tokens: 800, response_mime_type: 'application/json' }, schemaExample: example, language, retries: 1, partName: 'weapons-repair' });
+            const repaired = await fetchJsonWithRetriesUtil({ system: repairSystem, user: repairUser, options: { temperature: 0.0, max_tokens: 800, response_mime_type: 'application/json' }, schemaExample: example, language, retries: 1, partName: 'weapons-repair', callAI: chatWithAI, recentRepliesArray: RECENT_AI_REPLIES });
             console.log('SCENARIO_STEP3_WEAPONS_REPAIRED_BEGIN');
             console.log(JSON.stringify(repaired, null, 2));
             console.log('SCENARIO_STEP3_WEAPONS_REPAIRED_END');
@@ -995,7 +885,7 @@ async function generateScenarioStep4Timeline(language, context) {
     const example = examples.timeline || `[ {"time":"23:00","summary":"Heard argument","involvedSuspects":["suspect1"]} ]`;
     const system = `You are a scenario generator. Output ONLY valid JSON for timeline events with EXACT keys: time, summary, involvedSuspects. ${langInstr}`;
     const user = `Context:\n${JSON.stringify({ suspects: context.suspects, victim: context.victim })}\nReturn ONLY a JSON array of 3–6 timeline entries (keys MUST match EXACTLY) matching this example: ${example}`;
-    const parsed = await fetchJsonWithRetries({ system, user, options: { temperature: 0.05, max_tokens: 800, response_mime_type: 'application/json' }, schemaExample: example, language, retries: 1, partName: 'timeline' });
+    const parsed = await fetchJsonWithRetriesUtil({ system, user, options: { temperature: 0.05, max_tokens: 800, response_mime_type: 'application/json' }, schemaExample: example, language, retries: 1, partName: 'timeline', callAI: chatWithAI, recentRepliesArray: RECENT_AI_REPLIES });
     if (!Array.isArray(parsed) || parsed.length < 3) throw new Error('Malformed timeline part: too few entries');
     return parsed;
 }
@@ -1010,7 +900,7 @@ async function generateScenarioStep5Relationships(language, context) {
     const example = examples.relationships || `[ {"between":["suspect1","suspect2"],"type":"rivals","isSecret":false} ]`;
     const system = `You are a scenario generator. Output ONLY valid JSON for relationships. Keys MUST be EXACTLY: between, type, isSecret, note (optional). ${langInstr}`;
     const user = `Suspects ids: ${JSON.stringify(context.suspects.map(s => s.id))}\nReturn ONLY 2–5 relationships (keys MUST match EXACTLY) matching this example: ${example}`;
-    const parsed = await fetchJsonWithRetries({ system, user, options: { temperature: 0.05, max_tokens: 600, response_mime_type: 'application/json' }, schemaExample: example, language, retries: 1, partName: 'relationships' });
+    const parsed = await fetchJsonWithRetriesUtil({ system, user, options: { temperature: 0.05, max_tokens: 600, response_mime_type: 'application/json' }, schemaExample: example, language, retries: 1, partName: 'relationships', callAI: chatWithAI, recentRepliesArray: RECENT_AI_REPLIES });
     if (!Array.isArray(parsed)) throw new Error('Malformed relationships part');
     return parsed;
 }
@@ -1025,7 +915,7 @@ async function generateScenarioStep6WitnessedEvents(language, context) {
     const example = examples.witnessedEvents || `[ {"description":"Heard shouting","witnesses":["suspect1"],"involves":["suspect2"]} ]`;
     const system = `You are a scenario generator. Output ONLY valid JSON for witnessed events. Keys MUST be EXACTLY: time (optional), description, witnesses, involves (optional). ${langInstr}`;
     const user = `Context timeline and suspects:\n${JSON.stringify({ suspects: context.suspects, timeline: context.timeline })}\nReturn ONLY 2–4 witnessed events (keys MUST match EXACTLY) matching this example: ${example}`;
-    const parsed = await fetchJsonWithRetries({ system, user, options: { temperature: 0.05, max_tokens: 600, response_mime_type: 'application/json' }, schemaExample: example, language, retries: 1, partName: 'witnessed events' });
+    const parsed = await fetchJsonWithRetriesUtil({ system, user, options: { temperature: 0.05, max_tokens: 600, response_mime_type: 'application/json' }, schemaExample: example, language, retries: 1, partName: 'witnessed events', callAI: chatWithAI, recentRepliesArray: RECENT_AI_REPLIES });
     if (!Array.isArray(parsed) || parsed.length < 1) throw new Error('Malformed witnessed events part');
     return parsed;
 }
@@ -1040,7 +930,7 @@ async function generateScenarioStep7Truth(language, context) {
     const example = examples.truth || `{"guiltySuspectId":"suspect3","murderWeaponId":"weapon2","motiveCore":"jealousy","keyContradictions":["alibi mismatch"]}`;
     const system = `You are a scenario generator. Output ONLY valid JSON for the truth object. Keys MUST be EXACTLY: guiltySuspectId, murderWeaponId, motiveCore, keyContradictions. ${langInstr}`;
     const user = `Assemble context:\n${JSON.stringify(context)}\nReturn ONLY a JSON object that matches this example (keys MUST match EXACTLY): ${example}`;
-    const parsed = await fetchJsonWithRetries({ system, user, options: { temperature: 0.0, max_tokens: 800, response_mime_type: 'application/json' }, schemaExample: example, language, retries: 3, partName: 'truth' });
+    const parsed = await fetchJsonWithRetriesUtil({ system, user, options: { temperature: 0.0, max_tokens: 800, response_mime_type: 'application/json' }, schemaExample: example, language, retries: 3, partName: 'truth', callAI: chatWithAI, recentRepliesArray: RECENT_AI_REPLIES });
     if (!parsed || !parsed.guiltySuspectId || !parsed.murderWeaponId) throw new Error('Malformed truth part: missing guiltySuspectId or murderWeaponId');
     return parsed;
 }

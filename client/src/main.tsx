@@ -15,6 +15,7 @@ import { formatDuration } from './utils/time';
 import { buildSystemForSuspect } from './utils/buildSystem';
 import { tokenize } from './utils/tokenize';
 import LocaleProvider, { useLocale, useLanguage } from './i18n/LocaleProvider';
+import Celebration from './components/Celebration';
 
 // Set the body background to match the app background
 if (typeof document !== 'undefined') {
@@ -39,6 +40,10 @@ function AppInner() {
   const [debug, setDebug] = React.useState(false);
   const [debugEnabled, setDebugEnabled] = React.useState(false); // easter-egg unlock to reveal debug button
   const [solved, setSolved] = React.useState(false);
+  const [coloringEnabled, setColoringEnabled] = React.useState(true);
+  const [showAvatars, setShowAvatars] = React.useState(true);
+  const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
+  const [celebrationMethod, setCelebrationMethod] = React.useState<'confetti' | 'fireworks' | 'emoji' | null>(null);
   const [startTime, setStartTime] = React.useState<number | null>(null);
   const [elapsedMs, setElapsedMs] = React.useState<number>(0);
   const timerRef = React.useRef<number | null>(null);
@@ -51,7 +56,11 @@ function AppInner() {
   // --- MEMOS & UTILS ---
   const en = useLocale();
   const { language } = useLanguage();
+  const colorizeToggleLabel = (en.main as any)?.colorizeToggle || 'Colorize';
+  const showAvatarsToggleLabel = (en.main as any)?.showAvatarsToggle || 'Show character faces';
   const isRTL = language === 'Hebrew'
+  const toggleLabelWidth = 180;
+  const toggleLabelStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 6, width: toggleLabelWidth, justifyContent: 'flex-start' };
   const suspectNames = React.useMemo(() => new Set((scenario?.suspects ?? []).map((s: any) => s.name).filter(Boolean)), [scenario]);
   const weaponNames = React.useMemo(() => new Set((scenario?.weapons ?? []).map((w: any) => w.name).filter(Boolean)), [scenario]);
   const weaponKeywordMap = React.useMemo(() => {
@@ -189,6 +198,9 @@ function AppInner() {
       }
     }
     if (sc) {
+      // hide previous success and stop celebration when generating a new scenario
+      setSuccessMessage(null);
+      setCelebrationMethod(null);
       try {
         if (Array.isArray(sc.suspects)) {
           const arr = [...sc.suspects];
@@ -215,8 +227,9 @@ function AppInner() {
   };
 
   const openSuspect = (id: string) => {
-    setActiveSuspectId(id);
-    setMessages(histories[id] || []);
+  if (solved || thinking) return; // disable opening suspect chats after solved or while waiting for a reply
+  setActiveSuspectId(id);
+  setMessages(histories[id] || []);
   };
 
   const send = async (text: string) => {
@@ -226,6 +239,8 @@ function AppInner() {
     const system = buildSystemForSuspect(suspect, scenario, language);
     const next: ChatMessage[] = [...messages, { role: 'user' as const, content: text }];
     setMessages(next);
+  // mark that we're waiting for the AI response so the user can't switch suspects
+  setThinking(true);
     try {
       const resp = await chat(system, next, { temperature: 0.7, max_tokens: 180 });
       const reply = resp?.message?.content || '(no response)';
@@ -279,10 +294,14 @@ function AppInner() {
     setSolved(true);
     if (startTime) {
       const ms = Date.now() - startTime;
-      window.alert(`Congratulations! You solved the mystery in ${formatDuration(ms)}.`);
+      setSuccessMessage(`🎉 ${en.main.congratulations || 'Congratulations!'} \n${en.main.solvedIn || 'You solved the mystery in'} ${formatDuration(ms)}.`);
     } else {
-      window.alert('Congratulations! You solved the mystery.');
+      setSuccessMessage(`🎉 ${en.main.congratulations || 'Congratulations!'} \n${en.main.solved || 'You solved the mystery.'}`);
     }
+    // randomly pick a celebration
+    const methods: Array<'confetti' | 'fireworks' | 'emoji'> = ['confetti', 'fireworks', 'emoji']
+    const pick = methods[Math.floor(Math.random() * methods.length)]
+    setCelebrationMethod(pick)
   };
 
   // buildSystem moved to util
@@ -336,11 +355,19 @@ function AppInner() {
                             textAlign: 'left',
                             background: activeSuspectId === s.id ? '#334155' : '#475569',
                             color: '#f3f4f6',
+                            cursor: (solved || thinking) ? 'not-allowed' : 'pointer',
                             transition: 'background 0.2s',
                           }}
+                          disabled={solved || thinking}
+                          title={solved ? 'Chat disabled after solving' : (thinking ? 'Waiting for reply — cannot switch suspect' : undefined)}
                         >
                           <div style={{ display: 'grid', gridTemplateColumns: '36px 8px 1fr', alignItems: 'center', columnGap: 8, minHeight: 36 }}>
-                            <AvatarFace gender={s.gender} age={s.age} persona={s.persona || s.mannerisms?.join(' ')} size={36} accentColor={suspectColorById[s.id]} />
+                            {showAvatars ? (
+                              <AvatarFace gender={s.gender} age={s.age} persona={s.persona || s.mannerisms?.join(' ')} size={36} accentColor={suspectColorById[s.id]} />
+                            ) : (
+                              // invisible spacer to preserve layout when avatars are hidden
+                              <div aria-hidden="true" style={{ width: 36, height: 36, minWidth: 36, minHeight: 36, display: 'block' }} />
+                            )}
                             <div style={{ width: 8, height: 8, borderRadius: '50%', background: suspectColorById[s.id] }} />
                             <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, minWidth: 0, flexWrap: 'wrap' }}>
                               <strong style={{ wordBreak: 'break-word' }}>{s.name}</strong>
@@ -356,6 +383,21 @@ function AppInner() {
                       </li>
                     ))}
                   </ul>
+                  {/* show the color toggle only when a scenario is active and not yet solved */}
+                  {scenario && !solved && (
+                    <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, width: '100%' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center', width: '100%' }}>
+                        <label style={toggleLabelStyle}>
+                          <input type="checkbox" checked={coloringEnabled} onChange={(e) => setColoringEnabled(e.target.checked)} />
+                          <span style={{ fontSize: 12 }}>{colorizeToggleLabel}</span>
+                        </label>
+                        <label style={toggleLabelStyle}>
+                          <input type="checkbox" checked={showAvatars} onChange={(e) => setShowAvatars(e.target.checked)} />
+                          <span style={{ fontSize: 12 }}>{showAvatarsToggleLabel}</span>
+                        </label>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div>
                   <h3>{en.main.interrogateTitle}</h3>
@@ -367,6 +409,7 @@ function AppInner() {
                         thinking={thinking}
                         messages={messages}
                         onSend={send}
+                        disabled={solved}
                         colorize={(t: string) => {
                           // For Hebrew, normalize suspect names for RTL and possible diacritics
                           let normalizedSuspectNameToColor = { ...suspectNameToColor };
@@ -378,7 +421,7 @@ function AppInner() {
                               normalizedSuspectNameToColor[normName] = color;
                             });
                           }
-                          return colorizeText({ text: t, weaponKeywordMap, suspectNameToColor: normalizedSuspectNameToColor, suspectTokenToColor });
+                          return colorizeText({ text: t, weaponKeywordMap, suspectNameToColor: normalizedSuspectNameToColor, suspectTokenToColor, enabled: coloringEnabled });
                         }}
                       />
                     </div>
@@ -386,6 +429,19 @@ function AppInner() {
                 </div>
                 <div>
                   <SubmitPanel scenario={scenario} mentionedWeapons={mentionedWeapons} onSolved={handleSolved} />
+                  {successMessage && (
+                    <div style={{ marginTop: 12, padding: 12, background: 'linear-gradient(90deg,#064e3b,#065f46)', borderRadius: 8, color: '#ecfccb', whiteSpace: 'pre-line' }}>
+                      {successMessage}
+                    </div>
+                  )}
+                  {celebrationMethod && (
+                    // Celebration overlays the page with canvas effects
+                    <div>
+                      {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+                      {/* @ts-ignore */}
+                      <Celebration method={celebrationMethod} duration={6000} />
+                    </div>
+                  )}
                   <div style={{ marginTop: 16 }}>
                     <h3>{en.main.cluesTitle}</h3>
                     <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', margin: '6px 0 8px' }}>
@@ -410,7 +466,7 @@ function AppInner() {
                             <span>[{c.type}] </span>
                             <span style={{ color: suspectNameToColor[c.subject] || '#dc2626', fontWeight: 600 }}>{c.subject}</span>
                             <span>: </span>
-                            <span dangerouslySetInnerHTML={{ __html: colorizeText({ text: c.note, weaponKeywordMap, suspectNameToColor, suspectTokenToColor }) }} />
+                            <span dangerouslySetInnerHTML={{ __html: colorizeText({ text: c.note, weaponKeywordMap, suspectNameToColor, suspectTokenToColor, enabled: coloringEnabled }) }} />
                           </li>
                         ))}
                       </ul>

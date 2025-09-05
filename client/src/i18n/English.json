@@ -8,10 +8,10 @@
   },
   "about": {
     "title": "About Me",
-    "p1": "Hi! My name is Natty (נתי). I love games, stories, and programming, so I tend to combine them all.",
-    "p1b": "This is a side project I built myself, with help from AI, to show what it can do for building and for creating new experiences in games and entertainment.",
-    "p1c": "This project is an interesting solution to a problem game developers have dreamed of worldwide: a fully automatic experience that isn't predetermined—a game (not unlike Dungeons & Dragons) that's automatic, autonomous, and unique every time you play it.",
-    "p2": "If you enjoyed the game or have feedback, I'd love to hear from you!"
+    "p1": "Hi! My name is Natty (נתי). I love games, stories, and programming, so I decided to do a project that combines them all together.",
+    "p1b": "This is a side project that I built myself and with the help of artificial intelligence. The goal of the project was to see what artificial intelligence can do in developing and creating gaming and entertainment experiences.",
+    "p1c": "The project is an interesting solution to a problem that game developers all over the world have been dreaming about for years: a fully automated experience, not predetermined, a dynamic game (like D&D) - but automatic, independent, and unique every time. The experience that will respond appropriately to the behavior of the player, no matter who, and will always respond in context. This is where the AI ​​element comes in. It is a tool that will undoubtedly grow and take root in almost every area of ​​our lives in the future and I am happy to try it out in the world of games.",
+    "p2": "If you enjoyed the game and would like to get in touch, I am available in several ways:"
   },
   "how": {
     "title": "How It Works",
@@ -96,6 +96,11 @@
     "tryIn": "Try in {s}s",
     "submit": "Submit"
   },
+  "submit_extras": {
+    "usedThe": "used the",
+    "motiveLabel": "Motive:",
+    "keyContradictionsLabel": "Key contradictions:"
+  },
   "main": {
     "title": "Murder Mystery",
     "intro1": "Generate a scenario and inspect suspects, relationships, and witnessed events. (It might take a minute)",
@@ -114,6 +119,8 @@
     "noClues": "No clues yet.",
     "weaponsMentioned": "Weapons mentioned",
     "noneYet": "- none yet",
+  "colorizeToggle": "Colorize suspect names and weapons",
+  "showAvatarsToggle": "Show character faces",
     "settingLabel": "Setting:",
     "victimLabel": "Victim:",
     "funnyErrors": [
@@ -132,6 +139,10 @@
       "Crime scene GPS recalculating… please make a U-turn…",
       "Suspect fled in clown car. Counting how many got out…"
     ]
+  ,
+  "congratulations": "Congratulations!",
+  "solvedIn": "You solved the mystery in",
+  "solved": "You solved the mystery."
   },
   "labels": {
     "gender_male": "male",

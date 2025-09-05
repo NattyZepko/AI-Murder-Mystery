@@ -1,18 +1,9 @@
 const { chatWithAI } = require('./ai');
 const fs = require('fs');
 const path = require('path');
-
-function loadAiTemplate(language = 'English') {
-  try {
-    const name = String(language || 'English');
-    const file = path.resolve(__dirname, 'locales', 'ai', `${name}.json`);
-    if (fs.existsSync(file)) {
-      const txt = fs.readFileSync(file, 'utf8');
-      return JSON.parse(txt);
-    }
-  } catch (_) {}
-  return null;
-}
+const { loadAiTemplate: loadAiTemplateFromI18n } = require('./i18n');
+const { fetchJsonWithRetries: fetchJsonWithRetriesUtil } = require('./utils/jsonRepair');
+function loadAiTemplate(language = 'English') { return loadAiTemplateFromI18n(language); }
 
 // Ask AI to summarize only meaningful clues; returns [{ type, note }]
 async function extractMeaningfulClues({ reply, lastUserText, suspect, scenario, language }) {
@@ -36,26 +27,25 @@ Context:
 - Suspects: ${suspectsList}
 - Current suspect: ${suspect.name}`;
   const content = `User asked: ${lastUserText || ''}\nSuspect replied: ${reply}`;
-    const res = await chatWithAI({
-      system,
-      messages: [{ role: 'user', content }],
-      options: { temperature: 0.1, top_p: 0.2, max_tokens: 220 }
-    });
-    let payload = res.message?.content || '';
-    let json;
+    // Use centralized JSON repair/parse helper for robust parsing and automated repair
+    const userContent = `User asked: ${lastUserText || ''}\nSuspect replied: ${reply}`;
+    let parsed = null;
     try {
-      json = JSON.parse(payload);
-    } catch (_) {
-      const first = payload.indexOf('{');
-      const last = payload.lastIndexOf('}');
-      if (first >= 0 && last > first) {
-        const maybe = payload.slice(first, last + 1);
-        json = JSON.parse(maybe);
-      } else {
-        return [];
-      }
+      parsed = await fetchJsonWithRetriesUtil({
+        system,
+        user: userContent,
+        options: { temperature: 0.1, top_p: 0.2, max_tokens: 220 },
+        schemaExample: `{ "clues": [ { "type": "weapon", "note": "Kitchen Knife found near suspect X", "strength": "medium" } ] }`,
+        language,
+        retries: 1,
+        partName: 'clues',
+        callAI: async ({ system: sys, messages: msgs, options: opts }) => await chatWithAI({ system: sys, messages: msgs, options: opts }),
+        recentRepliesArray: null
+      });
+    } catch (err) {
+      return [];
     }
-    const clues = Array.isArray(json?.clues) ? json.clues : [];
+    const clues = Array.isArray(parsed?.clues) ? parsed.clues : [];
     return clues
       .filter(c => c && typeof c.note === 'string' && /^(medium|high)$/i.test(c.strength || ''))
       .map(c => {
