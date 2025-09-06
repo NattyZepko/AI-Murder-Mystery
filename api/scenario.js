@@ -1,8 +1,16 @@
-const fs = require('fs');
-const path = require('path');
-const { generateScenario, applyScenarioRules } = require('../core');
+let INIT_ERROR = null;
+let fs, path, generateScenario, applyScenarioRules;
+try {
+    fs = require('fs');
+    path = require('path');
+    ({ generateScenario, applyScenarioRules } = require('../core'));
+} catch (initErr) {
+    console.error('Initialization error in api/scenario:', initErr && initErr.stack ? initErr.stack : initErr);
+    INIT_ERROR = initErr;
+}
 
 module.exports = async (req, res) => {
+    if (INIT_ERROR) return res.status(500).json({ error: 'Initialization failed', details: String(INIT_ERROR && INIT_ERROR.message ? INIT_ERROR.message : INIT_ERROR) });
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
     try {
         const { language } = req.body || {};
@@ -11,6 +19,13 @@ module.exports = async (req, res) => {
         return res.status(200).json({ scenario });
     } catch (e) {
         console.error('Error generating scenario:', e && e.stack ? e.stack : e);
+        // Expose stack trace when called with ?debug=1 (safe for short-term debugging)
+        let showStack = false;
+        try {
+            const { URL } = require('url');
+            const u = new URL(req.url || '', 'http://localhost');
+            showStack = u.searchParams.get('debug') === '1';
+        } catch (_) { /* ignore */ }
         try {
             const msg = String(e && e.message ? e.message : '').toLowerCase();
             if (msg.includes('scenario malformed') || msg.includes('could not resolve a guilty suspect') || msg.includes('missing truth')) {
@@ -32,6 +47,7 @@ module.exports = async (req, res) => {
                 }
             }
         } catch (_) { }
+        if (showStack) return res.status(500).json({ error: e.message, stack: e.stack });
         return res.status(500).json({ error: e.message });
     }
 };
