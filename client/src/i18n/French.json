@@ -169,6 +169,9 @@
     "truthGuilty": "Vérité (guiltySuspectId)",
     "truthWeapon": "Vérité (murderWeaponId)",
     "motiveCore": "Noyau du motif",
+  "keyContradictions": "Contradictions clés",
+  "rawTruth": "Vérité brute (JSON)",
+  "rawScenario": "Scénario brut (JSON)",
     "suspects": "Suspects",
     "weapons": "Armes",
     "relationships": "Relations",
@@ -176,19 +179,30 @@
     "noData": "-",
     "betweenSeparator": " ↔ ",
     "suspectColumns": [
+      "id",
       "name",
       "gender",
       "age",
       "isGuilty",
       "motive",
       "alibi",
-      "verifiedBy"
+      "verifiedBy",
+      "knowledge",
+      "contradictions",
+      "mannerisms",
+      "quirks",
+      "persona",
+      "backstory",
+      "catchphrase"
     ],
     "weaponColumns": [
+      "id",
       "name",
       "isMurderWeapon",
       "foundOn",
-      "foundNear"
+      "foundNear",
+      "discoveredHints",
+      "description"
     ],
     "relColumns": [
       "between",

@@ -74,6 +74,8 @@ export function DebugPanel({ scenario }: { scenario: any }) {
             <tr><td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{en.debug.truthGuilty}</td><td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{scenario.truth?.guiltySuspectId} {nameById[scenario.truth?.guiltySuspectId] ? `(${nameById[scenario.truth?.guiltySuspectId]})` : ''}</td></tr>
             <tr><td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{en.debug.truthWeapon}</td><td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{scenario.truth?.murderWeaponId}</td></tr>
             <tr><td style={{ padding: 6, borderRight: '1px solid #eee' }}>{en.debug.motiveCore}</td><td style={{ padding: 6, borderRight: '1px solid #eee' }}>{scenario.truth?.motiveCore}</td></tr>
+            <tr><td style={{ padding: 6, borderRight: '1px solid #eee' }}>{en.debug.keyContradictions}</td><td style={{ padding: 6, borderRight: '1px solid #eee' }}>{(scenario.truth?.keyContradictions || []).join('; ')}</td></tr>
+            <tr><td style={{ padding: 6, borderRight: '1px solid #eee' }}>{en.debug.rawTruth}</td><td style={{ padding: 6, borderRight: '1px solid #eee', fontFamily: 'monospace', whiteSpace: 'pre-wrap' }}>{JSON.stringify(scenario.truth || {}, null, 2)}</td></tr>
           </tbody>
         </table>
       </div>
@@ -82,11 +84,10 @@ export function DebugPanel({ scenario }: { scenario: any }) {
         <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #ccc' }}>
           <thead>
             <tr>
-              {['name','gender','age','isGuilty','motive','alibi','verifiedBy'].map((h) => (
-                <th key={h} onClick={() => setSuspectSort(prev => ({ key: h === 'verifiedBy' ? 'alibiVerifiedBy' : h, dir: prev.key === (h === 'verifiedBy' ? 'alibiVerifiedBy' : h) && prev.dir === 'asc' ? 'desc' : 'asc' }))}
-                    style={{ textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #ccc', padding: 6, borderRight: '1px solid #ddd' }}>
+              {['id','name','gender','age','isGuilty','motive','alibi','verifiedBy','knowledge','contradictions','mannerisms','quirks','persona','backstory','catchphrase'].map((h) => (
+                <th key={h}
+                    style={{ textAlign: 'left', borderBottom: '1px solid #ccc', padding: 6, borderRight: '1px solid #ddd' }}>
                   {h}
-                  {suspectSort.key === (h === 'verifiedBy' ? 'alibiVerifiedBy' : h) ? (suspectSort.dir === 'asc' ? ' ▲' : ' ▼') : ''}
                 </th>
               ))}
             </tr>
@@ -94,6 +95,7 @@ export function DebugPanel({ scenario }: { scenario: any }) {
           <tbody>
             {sortedSuspects.map((s: any) => (
               <tr key={s.id}>
+                <td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{s.id}</td>
                 <td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{s.name}</td>
                 <td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{s.gender}</td>
                 <td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{s.age}</td>
@@ -101,6 +103,13 @@ export function DebugPanel({ scenario }: { scenario: any }) {
                 <td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{s.motive || ''}</td>
                 <td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{s.alibi || ''}</td>
                 <td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{(s.alibiVerifiedBy || []).map((id: string) => nameById[id] || id).join(', ')}</td>
+                <td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{(s.knowledge || []).join('; ')}</td>
+                <td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{(s.contradictions || []).join('; ')}</td>
+                <td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{(s.mannerisms || []).join('; ')}</td>
+                <td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{(s.quirks || []).join('; ')}</td>
+                <td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{s.persona || ''}</td>
+                <td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{s.backstory || ''}</td>
+                <td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{s.catchphrase || ''}</td>
               </tr>
             ))}
           </tbody>
@@ -111,26 +120,21 @@ export function DebugPanel({ scenario }: { scenario: any }) {
         <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #ccc' }}>
           <thead>
             <tr>
-              {en.debug.weaponColumns.map((h: any) => {
-                const key = String(h)
-                const sortKey = key === 'foundOn' ? 'foundOnSuspectId' : key === 'foundNear' ? 'foundNearSuspectId' : key
-                return (
-                  <th key={key} onClick={() => setWeaponSort(prev => ({ key: sortKey, dir: prev.key === sortKey && prev.dir === 'asc' ? 'desc' : 'asc' }))}
-                      style={{ textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #ccc', padding: 6, borderRight: '1px solid #ddd' }}>
-                    {String(h)}
-                    {weaponSort.key === sortKey ? (weaponSort.dir === 'asc' ? ' ▲' : ' ▼') : ''}
-                  </th>
-                )
-              })}
+              {['id','name','isMurderWeapon','foundOn','foundNear','discoveredHints','description'].map((h: any) => (
+                <th key={String(h)} style={{ textAlign: 'left', borderBottom: '1px solid #ccc', padding: 6, borderRight: '1px solid #ddd' }}>{String(h)}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {sortedWeapons.map((w: any) => (
               <tr key={w.id}>
+                <td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{w.id}</td>
                 <td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{w.name}</td>
                 <td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{String(Boolean(w.isMurderWeapon))}</td>
                 <td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{w.foundOnSuspectId ? (nameById[w.foundOnSuspectId] || w.foundOnSuspectId) : ''}</td>
                 <td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{w.foundNearSuspectId ? (nameById[w.foundNearSuspectId] || w.foundNearSuspectId) : ''}</td>
+                <td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{(w.discoveredHints || []).join('; ')}</td>
+                <td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{w.description || ''}</td>
               </tr>
             ))}
           </tbody>
@@ -193,12 +197,20 @@ export function DebugPanel({ scenario }: { scenario: any }) {
                   <td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{w.description}</td>
                   <td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{(w.witnesses || []).map((id: string) => nameById[id] || id).join(', ')}</td>
                   <td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{(w.involves || []).map((id: string) => nameById[id] || id).join(', ')}</td>
+                  <td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{w.source || ''}</td>
+                  <td style={{ padding: 6, borderBottom: '1px solid #eee', borderRight: '1px solid #eee' }}>{w.note || ''}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
+      
+      {/* Raw scenario JSON for deep debugging */}
+      <div>
+        <h4>{en.debug.rawScenario}</h4>
+        <pre style={{ background: '#f8f8f8', padding: 8, borderRadius: 4, overflow: 'auto', maxHeight: 400 }}>{JSON.stringify(scenario || {}, null, 2)}</pre>
+      </div>
     </div>
   )
 }

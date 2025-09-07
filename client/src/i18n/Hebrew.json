@@ -169,6 +169,9 @@
     "truthGuilty": "האמת (guiltySuspectId)",
     "truthWeapon": "האמת (murderWeaponId)",
     "motiveCore": "גרעין המניע",
+  "keyContradictions": "סתירות מפתח",
+  "rawTruth": "האמת (JSON גולמי)",
+  "rawScenario": "תרחיש גולמי (JSON)",
     "suspects": "חשודים",
     "weapons": "נשקים",
     "relationships": "קשרים",
@@ -176,19 +179,30 @@
     "noData": "-",
     "betweenSeparator": " ↔ ",
     "suspectColumns": [
+      "id",
       "name",
       "gender",
       "age",
       "isGuilty",
       "motive",
       "alibi",
-      "verifiedBy"
+      "verifiedBy",
+      "knowledge",
+      "contradictions",
+      "mannerisms",
+      "quirks",
+      "persona",
+      "backstory",
+      "catchphrase"
     ],
     "weaponColumns": [
+      "id",
       "name",
       "isMurderWeapon",
       "foundOn",
-      "foundNear"
+      "foundNear",
+      "discoveredHints",
+      "description"
     ],
     "relColumns": [
       "between",

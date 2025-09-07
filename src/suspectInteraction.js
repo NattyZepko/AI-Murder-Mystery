@@ -59,7 +59,7 @@ function createSuspectInteractor({ rl, scenario, lockInput, unlockInput, discove
     const langInstr = tpl.suspect_system_prefix || (language && String(language).toLowerCase() !== 'english'
       ? `Produce all responses in ${language}. Return names and descriptions in ${language}.`
       : `Produce all responses in English.`);
-    const system = `${langInstr}\nYou are roleplaying as the suspect in a murder mystery.
+  const system = `${langInstr}\nYou are roleplaying as the suspect in a murder mystery.
 Persona: ${suspect.persona || ''}
 Name: ${suspect.name}
 Gender: ${suspect.gender || 'unknown'}
@@ -101,6 +101,7 @@ Rules:
 - Do not include stage directions or behavior descriptions (no asterisks like *sighs*, no parenthetical actions). Let emotion be implied through word choice and rhythm.
 - Weave mentions of the weapons when relevant; offer opinions or observations about them.
 - Occasionally reference other suspects by name and, if plausible, express suspicion or blame—especially to deflect if you're guilty.
+- IMPORTANT: You MUST remember and consistently use your claimed alibi in the conversation. Do NOT change your alibi mid-conversation. If other suspects verify your alibi, ensure your account matches their alibi details exactly (time, location, companions). When asked about your alibi, provide consistent, specific details that align with the "People who verify your alibi" section above.
 - If you are the murderer, you know you did it and will deny it unless the user cornered you with contradictions.
 - If you have an alibi, bring it up only when asked about it, and be prepared to provide details.
 - Keep responses short (1-3 sentences). Avoid rambling.`;

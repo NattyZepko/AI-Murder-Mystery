@@ -237,6 +237,49 @@ function postProcessScenario(scenario) {
                 }
             }
 
+            // Align alibi texts across verifier groups: if one member of a mutual verifier group
+            // has a meaningful alibi (not the default), copy that alibi to any members who have
+            // the default placeholder. This makes corroborating alibis consistent.
+            try {
+                const DEFAULT_ALIBI = 'Prefers not to say.';
+                const processed = new Set();
+                for (const s of innocents) {
+                    if (!s || !s.id) continue;
+                    if (processed.has(s.id)) continue;
+                    // Build closure of the verifier group (s plus anyone who directly verifies or is verified by them)
+                    const groupIds = new Set([s.id]);
+                    const queue = [s.id];
+                    while (queue.length) {
+                        const curId = queue.shift();
+                        const cur = suspectsById[curId];
+                        if (!cur) continue;
+                        const others = Array.isArray(cur.alibiVerifiedBy) ? cur.alibiVerifiedBy.slice() : [];
+                        // also include those who list cur as verifier
+                        for (const cand of innocents) {
+                            if (!cand || !cand.id) continue;
+                            if (Array.isArray(cand.alibiVerifiedBy) && cand.alibiVerifiedBy.includes(curId)) others.push(cand.id);
+                        }
+                        for (const o of others) {
+                            if (!o || o === curId) continue;
+                            if (!groupIds.has(o) && o !== (scenario.truth && scenario.truth.guiltySuspectId)) {
+                                groupIds.add(o);
+                                queue.push(o);
+                            }
+                        }
+                    }
+                    const members = Array.from(groupIds).map(id => suspectsById[id]).filter(Boolean);
+                    // Find any member with a meaningful alibi
+                    const rep = members.find(m => m.alibi && m.alibi !== DEFAULT_ALIBI && m.alibi.trim());
+                    if (rep) {
+                        for (const m of members) {
+                            if (!m) continue;
+                            if (!m.alibi || m.alibi === DEFAULT_ALIBI) m.alibi = rep.alibi;
+                        }
+                    }
+                    members.forEach(m => { if (m && m.id) processed.add(m.id); });
+                }
+            } catch (_) { }
+
             // Final cleanup
             for (const s of suspects) {
                 if (!s || typeof s !== 'object') continue;
