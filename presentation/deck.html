@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Murder Mystery — Presentation</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4/dist/theme/white.css" id="theme">
+
+    <style>
+      body { background: linear-gradient(180deg,#071021 0%, #0b2333 28%, #0f2f44 60%); }
+  /* Emoji and color accents */
+  .emoji { display:inline-block; font-size:1.1em; margin-right:10px; transform:translateY(-1px); }
+  .card { box-shadow: 0 6px 18px rgba(2,6,23,0.12); }
+  /* Larger slide GIFs, centered at bottom of each card */
+  .slide-gif { display:block; margin:18px auto 0; width:360px; max-width:86%; border-radius:8px; }
+      section[data-bg="soft"] .card { background: linear-gradient(180deg, #fff, #fbfcff); border-left:6px solid #F7C948; }
+      section[data-bg="accent"] .card { background: linear-gradient(90deg,#fff8f0,#f3fbff); border-left:6px solid #7AD3FF; }
+  /* Make slide cards larger so content fills more of the viewport */
+  .card { background: rgba(255,255,255,0.95); border-radius:12px; padding:22px; max-width:1200px; margin:0 auto; color:#111; font-size:24px; line-height:1.6; overflow-wrap:break-word; }
+      section[data-bg="ocean"] .card { background: rgba(0,0,0,0.6); color:#fff; }
+      h1.title { font-size:64px; margin:0 0 8px 0; }
+      p.subtitle { margin:8px 0 14px 0; color:#F28B30; }
+      .notes { display:block; margin-top:14px; font-size:14px; color:rgba(0,0,0,0.6); }
+      section[data-bg="ocean"] .notes { color: rgba(255,255,255,0.9); }
+  /* Layout tweak for suspect slide to keep text inside bounds */
+  /* Use the same base font-size as other slides so suspect content matches visually */
+  /* Keep suspect slide width and padding consistent with other slides so Reveal.js doesn't downscale it */
+  .card h2 { font-size:40px; margin:0 0 10px 0; }
+  .suspect-slide .card { max-width:1200px; padding:18px 28px; font-size:26px; }
+  @media (max-width:900px){ .suspect-slide .card { padding:14px; font-size:18px; } }
+  @media (max-width:900px){ .card{ padding:14px; font-size:18px; } h1.title{ font-size:40px } .card h2{ font-size:26px } }
+    </style>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+
+        <section data-bg="ocean">
+          <div class="card">
+            <h1 class="title"><span class="emoji">🕵️‍♀️</span>AI Murder Mystery Game</h1>
+            <p class="subtitle">Procedural, AI-driven detective game — quick demo</p>
+            <img class="slide-gif" src="./funny-detective-pipe-hat-41708939.jpg" alt="funny detective">
+            <aside class="notes">Today I'll present AI Murder Mystery — a game where players interrogate suspects and collect clues. We'll finish with a short live demo.</aside>
+          </div>
+        </section>
+
+        <section data-bg="soft">
+          <div class="card">
+            <h2><span class="emoji">💡</span>What is this game</h2>
+            <ul>
+              <li>An interactive detective game where AI plays the suspects</li>
+              <li>Each case is generated on the spot — new victim, suspects, and motives</li>
+              <li>Players ask questions; the game highlights important clues automatically</li>
+            </ul>
+            <aside class="notes">Explain it's a game-first experience — unique stories each time. The system helps track clues so players can focus on solving.</aside>
+          </div>
+        </section>
+
+        <section data-bg="soft">
+          <div class="card">
+            <h2><span class="emoji">🎭</span>Player experience</h2>
+            <ul>
+              <li>Immersive roleplay — suspects answer naturally in-character</li>
+              <li>Surprising twists — procedurally generated details</li>
+              <li>A clear, updating clue list to help you keep track</li>
+              <li>Simple UI: ask a question, review clues, and make an accusation</li>
+            </ul>
+            <img class="slide-gif" src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" alt="roleplay">
+            <aside class="notes">Walk through the player's journey: quick-to-start, surprising outcomes, and a helpful clue list that keeps play focused and fun.</aside>
+          </div>
+        </section>
+
+        <section data-bg="accent">
+          <div class="card">
+            <h2><span class="emoji">⚙️</span>How it works (high level)</h2>
+            <div style="text-align:center;margin-top:12px;border-radius:8px;padding:12px;background:linear-gradient(90deg,#fff,#f8fbff);">
+              Client UI → Suspects → AI (roleplay) → Clue extractor → Client UI
+            </div>
+            <aside class="notes">Describe: you ask a suspect a question, the suspect replies in-character, the system picks out useful facts and shows them as clues.</aside>
+          </div>
+        </section>
+
+        <section data-bg="soft">
+          <div class="card">
+            <h2><span class="emoji">🧭</span>Player flow (simple)</h2>
+            <ol>
+              <li>Start a new case</li>
+              <li>Pick a suspect and ask questions</li>
+              <li>Watch the live clue list update</li>
+              <li>Form a theory and submit your accusation</li>
+              <li>See the result and the true story</li>
+            </ol>
+            <aside class="notes">Emphasize clues are collected automatically so players focus on the story and deduction.</aside>
+          </div>
+        </section>
+        <!-- Suspect character slide -->
+        <section data-bg="soft" class="suspect-slide">
+          <div class="card">
+            <h2><span class="emoji">🧑‍💼</span>Suspect characters</h2>
+            <ul>
+              <li><strong>Unique backstories:</strong> each suspect has a crafted history that shapes their motives and memories.</li>
+              <li><strong>Limited knowledge:</strong> suspects only know what fits their role and past — answers stay in-character.</li>
+              <li><strong>Distinct behavior:</strong> personality, evasiveness, and lie patterns differ per suspect for richer interrogation.</li>
+            </ul>
+            <aside class="notes">Explain suspects are built as characters (backstory, knowledge limits, and behavioral patterns) so roleplay stays consistent and interesting.</aside>
+          </div>
+        </section>
+
+        <!-- Weapons & clue-list slide -->
+        <section data-bg="soft">
+          <div class="card">
+            <h2><span class="emoji">🔪</span>Weapons and the clue list</h2>
+            <p>When a suspect mentions a weapon it is automatically added to the case's weapon list. Players can track these candidate implements while gathering evidence.</p>
+            <ul>
+              <li>The weapon list collates all mentioned implements for quick reference.</li>
+              <li>Clues about how and where a weapon was used are linked to entries in the list.</li>
+              <li>At the end of a case players must pick the murder weapon from the candidates — the choice is compared to the truth when you submit an accusation.</li>
+            </ul>
+            <aside class="notes">Point out the weapon list is auto-populated from suspect answers and ties into the clue system and the final accusation.</aside>
+          </div>
+        </section>
+
+        <section data-bg="soft">
+          <div class="card">
+            <h2><span class="emoji">🎨</span>Make it your own</h2>
+            <ul>
+              <li>Change how suspects speak by editing short instruction text (no coding needed)</li>
+              <li>Adjust story style, the game behavior, or even what the game is about</li>
+              <li>Customizing is as easy as telling the AI what to do</li>
+            </ul>
+            <aside class="notes">Explain customizations are mostly text edits — quick and accessible.</aside>
+          </div>
+        </section>
+
+
+        <section data-bg="ocean">
+          <div class="card">
+            <h2>Now let's try the game</h2>
+            <p>We're going to play a short live case now — I'll generate a scenario and we can question suspects together.</p>
+            <aside class="notes">Transition to live play: invite the audience to ask questions or pick a suspect.</aside>
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4/dist/reveal.js"></script>
+    <script>
+      Reveal.initialize({
+        hash: true,
+        slideNumber: true,
+        controls: true,
+        progress: true,
+        margin: 0,
+        minScale: 1,
+        maxScale: 5
+      });
+    </script>
+  </body>
+</html>
